@@ -23,9 +23,10 @@ package Objects
 		{
 			super();
 			this.usable = true;
-			GameManager.main.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			this.useBounds = getChildByName("useBounds") as MovieClip;
 			addEventListener(Event.ENTER_FRAME, Update);
+			addEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
 		}
 		
 		public function Update(e:Event):void {
@@ -47,12 +48,23 @@ package Objects
 			
 		}
 		
+		public function RemoveListeners(e:Event):void {
+			removeEventListener(Event.ENTER_FRAME, Update);
+			removeEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
+			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+		}
+		
+		
 		public function KeyDown(e:KeyboardEvent):void {
 			if (e.keyCode == Keys.USE) {
 				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
-					
+					Use();
 				}
 			}
+		}
+		
+		protected function Use():void {
+			
 		}
 		
 	}

@@ -11,6 +11,7 @@ package Screens {
 	
 	import Entity.EntityBase;
 	import Entity.Sean;
+	import Constants.RoomNames;
 	
 	import Objects.*;
 	
@@ -22,19 +23,30 @@ package Screens {
 		private var room:Room;
 		private var mouseInfo:MouseInfo;
 		
+		private var roomLayer:MovieClip;
+		private var uiLayer:MovieClip;
+		
+		
 		public function GameScreen(main:Main) {
 			
+			main.gotoAndStop(1, "seanroom");
+			
+			GameManager.gameScreen = this;
 			this.main = main;
+			
+			uiLayer = main.getChildByName("uiLayer") as MovieClip;
+			uiLayer.mouseEnabled = false;
+			
+			roomLayer = main.getChildByName("roomLayer") as MovieClip;
+			
 			var ui:UI = new UI();
 			GameManager.ui = ui;
 			
 			sean = new Sean(this);
 			GameManager.sean = sean;
 
-			room = new SeansRoom();
-			main.addChild(room);
-			room.Initialize();
-			room.AddObjects();
+			SetRoom(new SeansRoom(RoomNames.NONE));
+			
 			
 			main.addEventListener(Event.ENTER_FRAME, Update);
 			sean.Initialize();
@@ -45,9 +57,9 @@ package Screens {
 			mouseInfo.x = main.stage.mouseX;
 			mouseInfo.y = main.stage.mouseY;
 			GameManager.mouseInfo = mouseInfo;
-			main.addChild(mouseInfo);
+			uiLayer.addChild(mouseInfo);
 			
-			main.addChild(ui);
+			uiLayer.addChild(ui);
 		}
 		
 		public function Update(e:Event):void {
@@ -61,7 +73,16 @@ package Screens {
 		}
 		
 		public function SetRoom(r:Room):void {
-			this.room = r;
+			if(room != null) {
+				roomLayer.removeChild(room);
+			}
+
+			GameManager.ui.SetDescriptor("", true);
+			
+			room = r;
+			roomLayer.addChild(room);
+			room.Initialize();
+			room.AddObjects();
 		}
 		
 	}

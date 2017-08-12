@@ -1,5 +1,8 @@
-﻿package Constants 
+package Constants 
 {
+	import Rooms.HallwayRoom;
+	import Rooms.Room;
+	import Rooms.SeansRoom;
 	/**
 	 * ...
 	 * @author Rixium
@@ -7,6 +10,7 @@
 	public class RoomNames 
 	{
 		
+		public static var NONE = -1;
 		public static var SEANSROOM = 0;
 		public static var HALLWAY = 1;
 		public static var ATTIC = 2;
@@ -33,6 +37,27 @@
 			}
 			
 			return "";
+		}
+		
+		public static function GetRoom(currentRoom:int, room:int):Room {
+			switch(room) {
+				case SEANSROOM:
+					return new SeansRoom(currentRoom);
+				case HALLWAY:
+					return new HallwayRoom(currentRoom);
+				case ATTIC:
+					break;
+				case LIVINGROOM:
+					break;
+				case KITCHEN:
+					break;
+				case MASROOM:
+					break;
+				default:
+					break;
+			}
+			
+			return null;
 		}
 		
 	}

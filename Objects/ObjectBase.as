@@ -3,6 +3,7 @@ package Objects
 	
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
+	import flash.events.Event;
 	
 	import Constants.GameManager;
 	
@@ -23,6 +24,14 @@ package Objects
 			addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
 			addEventListener(MouseEvent.CLICK, MouseClick);
+			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
+		}
+		
+		public function OnRemove(e:Event):void {
+			removeEventListener(MouseEvent.MOUSE_OVER, MouseOver);
+			removeEventListener(MouseEvent.MOUSE_OUT, MouseOut);
+			removeEventListener(MouseEvent.CLICK, MouseClick);
+			removeEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
 		public function MouseClick(e:MouseEvent):void {

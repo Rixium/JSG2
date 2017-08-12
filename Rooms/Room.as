@@ -13,11 +13,14 @@ package Rooms
 	public class Room  extends MovieClip
 	{
 		
-		protected var objects:Array = [];
+		protected var objects:Array;
+		protected var lastRoom:int
+		protected var doors:Array;
 		
 		public function Room() 
 		{
-			
+			objects = [];
+			doors = [];
 		}
 		
 		public function Initialize():void {

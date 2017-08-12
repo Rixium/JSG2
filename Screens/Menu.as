@@ -24,7 +24,6 @@
 		}
 		
 		private function StartGame(e:MouseEvent):void {
-			main.gotoAndStop(1, "seanroom");
 			RemoveFromStage(mainMenu);
 			main.SetScreen(new GameScreen(main));
 		}

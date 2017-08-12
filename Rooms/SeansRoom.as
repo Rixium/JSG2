@@ -7,13 +7,15 @@ package Rooms
 	
 	import Objects.*;
 	import Constants.RoomNames;
+	import Constants.GameManager;
 	
 	public class SeansRoom extends Room
 	{
 		
-		public function SeansRoom() 
+		public function SeansRoom(lastRoom:int) 
 		{
 			super();
+			this.lastRoom = lastRoom;
 		}
 		
 		public override function AddObjects():void {
@@ -24,10 +26,10 @@ package Rooms
 			var cabinet:Chest = new Chest(700, 187, 120, 190);
 			var desk:Table = new Table(920, 177, 313, 156);
 			var shelf:Shelf = new Shelf(320, 19, 248, 302);
-			var door:Door = new Door(165, 15, 125, 321, false, RoomNames.HALLWAY);
+			var door:Door = new Door(165, 15, 125, 321, false, RoomNames.HALLWAY, RoomNames.SEANSROOM);
 			var rug:Rug = new Rug(320, 380, 715, 267);
 			var bed:Bed = new Bed(848, 531, 440, 220);
-			
+			var computerScreen:ComputerScreen = new ComputerScreen(1020, 100, 140, 140);
 			var book:Book = new Book(955, 185, 52, 166);
 			
 			studioLight.displayName = "Studio Light";
@@ -42,7 +44,7 @@ package Rooms
 			shelf.displayName = "Shelf";
 			shelf.description = "A bunch of collectibles and fan stuff.";
 			shelf.interactable = true;
-			door.displayName = "To Hallway";
+			door.displayName = "Door";
 			door.description = "Covered in gross green slime.." + door.description;
 			door.interactable = true;
 			rug.displayName = "Rug";
@@ -52,6 +54,8 @@ package Rooms
 			bed.description = "A standard sized bed.";
 			book.displayName = "Book";
 			book.description = "Perhaps I should read that..";
+			computerScreen.displayName = "Computer Monitor";
+			computerScreen.description = "There is a hole in the screen..";
 
 			bLayer.addChild(studioLight);
 			bLayer.addChild(cabinet);
@@ -61,6 +65,7 @@ package Rooms
 			bLayer.addChild(rug);
 			fLayer.addChild(bed);
 			bLayer.addChild(book);
+			bLayer.addChild(computerScreen);
 			
 			objects.push(studioLight);
 			objects.push(cabinet);
@@ -70,6 +75,19 @@ package Rooms
 			objects.push(rug);
 			objects.push(bed);
 			objects.push(book);
+			
+			doors.push(door);
+
+			if (lastRoom != RoomNames.NONE) {
+				for (var i:int = 0; i < doors.length; i++) {
+					var d:Door = doors[i];
+					if (d.roomLink == lastRoom) {
+						GameManager.sean.x = d.x + d.width / 2;
+						GameManager.sean.y = d.y + d.height / 2;
+					}
+				}
+			}
+			
 		}
 		
 	}

@@ -1,6 +1,7 @@
 package Constants 
 {
 	import Rooms.HallwayRoom;
+	import Rooms.MasRoom;
 	import Rooms.Room;
 	import Rooms.SeansRoom;
 	/**
@@ -17,6 +18,11 @@ package Constants
 		public static var LIVINGROOM = 3;
 		public static var KITCHEN = 4;
 		public static var MASROOM = 5;
+		
+		private static var SEANINSTANCE:SeansRoom = null;
+		private static var HALLINSTANCE:HallwayRoom = null;
+		private static var MASINSTANCE:MasRoom = null;
+		
 		
 		public static function GetRoomName(room:int):String {
 			switch(room) {
@@ -42,9 +48,19 @@ package Constants
 		public static function GetRoom(currentRoom:int, room:int):Room {
 			switch(room) {
 				case SEANSROOM:
-					return new SeansRoom(currentRoom);
+					if(SEANINSTANCE == null) {
+						SEANINSTANCE = new SeansRoom(currentRoom);
+					} else {
+						SEANINSTANCE.lastRoom = currentRoom; 
+					}
+					return SEANINSTANCE;
 				case HALLWAY:
-					return new HallwayRoom(currentRoom);
+					if(HALLINSTANCE == null) {
+						HALLINSTANCE = new HallwayRoom(currentRoom);
+					} else {
+						HALLINSTANCE.lastRoom = currentRoom; 
+					}
+					return HALLINSTANCE;
 				case ATTIC:
 					break;
 				case LIVINGROOM:
@@ -52,14 +68,18 @@ package Constants
 				case KITCHEN:
 					break;
 				case MASROOM:
-					break;
+					if(MASINSTANCE == null) {
+						MASINSTANCE = new MasRoom(currentRoom);
+					} else {
+						MASINSTANCE.lastRoom = currentRoom; 
+					}
+					return MASINSTANCE;
 				default:
 					break;
 			}
 			
 			return null;
 		}
-		
 	}
 
 }

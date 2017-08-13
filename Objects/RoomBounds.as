@@ -9,6 +9,7 @@ package Objects
 		
 		public function RoomBounds() 
 		{
+			super();
 			this.collidable = true;
 			this.interactable = false;
 			this.mouseEnabled = false;

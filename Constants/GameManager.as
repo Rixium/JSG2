@@ -14,5 +14,7 @@ package Constants
 		public static var sean:Sean;
 		public static var ui:UI;
 		
+		public static var soundLevel = .5;
+		
 	}
 }

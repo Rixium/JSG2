@@ -29,6 +29,13 @@ package Objects
 			addEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
 		}
 		
+		public function UseInitialize():void {
+			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			this.useBounds = getChildByName("useBounds") as MovieClip;
+			addEventListener(Event.ENTER_FRAME, Update);
+			addEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
+		}
+		
 		public function Update(e:Event):void {
 			if(!showing) {
 				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {

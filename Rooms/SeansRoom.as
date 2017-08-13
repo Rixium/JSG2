@@ -8,9 +8,22 @@ package Rooms
 	import Objects.*;
 	import Constants.RoomNames;
 	import Constants.GameManager;
+	import Constants.DoorTypes;
 	
 	public class SeansRoom extends Room
 	{
+		
+		var studioLight:StudioLight;
+		var cabinet:Chest;
+		var desk:Table;
+		var shelf:Shelf;
+		var door:Door;
+		var rug:Rug;
+		var bed:Bed;
+		var computerScreen:ComputerScreen;
+		var book:Book;
+		var computerTower:ComputerTower;
+		var plant:Plant;
 		
 		public function SeansRoom(lastRoom:int) 
 		{
@@ -22,41 +35,82 @@ package Rooms
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 			
-			var studioLight:StudioLight = new StudioLight(588, 39, 106, 280);
-			var cabinet:Chest = new Chest(700, 187, 120, 190);
-			var desk:Table = new Table(920, 177, 313, 156);
-			var shelf:Shelf = new Shelf(320, 19, 248, 302);
-			var door:Door = new Door(165, 15, 125, 321, false, RoomNames.HALLWAY, RoomNames.SEANSROOM);
-			var rug:Rug = new Rug(320, 380, 715, 267);
-			var bed:Bed = new Bed(848, 531, 440, 220);
-			var computerScreen:ComputerScreen = new ComputerScreen(1020, 100, 140, 140);
-			var book:Book = new Book(955, 185, 52, 166);
+			if(studioLight == null) {
+				studioLight = new StudioLight(588, 88, 106, 280);
+				studioLight.displayName = "Studio Light";
+				studioLight.description = "A professional light for exceptional quality.";
+				studioLight.interactable = true;
+				objects.push(studioLight);
+			}
+			if(cabinet == null) {
+				cabinet = new Chest(700, 226, 120, 190);
+				cabinet.displayName = "Cabinet";
+				cabinet.description = "A place to store things.";
+				cabinet.interactable = true;
+				objects.push(cabinet);
+			}
+			if(desk == null) {
+				desk = new Table(820, 223, 313, 156);
+				desk.displayName = "Desk";
+				desk.description = "Not quite big enough.";
+				desk.interactable = true;
+				objects.push(desk);
+			}
+			if(shelf == null) {
+				shelf = new Shelf(320, 64, 248, 302);
+				shelf.displayName = "Shelf";
+				shelf.description = "A bunch of collectibles and fan stuff.";
+				shelf.interactable = true;
+				objects.push(shelf);
+			}
+			if(door == null) {
+				door = new Door(120, 61, 125, 312, false, RoomNames.HALLWAY, RoomNames.SEANSROOM, DoorTypes.SLIME);
+				door.displayName = "Door";
+				door.description = "Covered in gross green slime.." + door.description;
+				door.interactable = true;
+				objects.push(door);
+				doors.push(door);
+			}
+			if(rug == null) {
+				rug = new Rug(320, 380, 715, 267);
+				rug.displayName = "Rug";
+				rug.description = "A luxurious red rug.";
+				rug.collidable = false;
+				objects.push(rug);
+			}
+			if(bed == null) {
+				bed = new Bed(848, 540, 440, 220);
+				bed.displayName = "Bed";
+				bed.description = "A standard sized bed.";
+				objects.push(bed);
+			}
+			if(computerScreen == null) {
+				computerScreen = new ComputerScreen(905, 149, 140, 140);
+				computerScreen.displayName = "Monitor";
+				computerScreen.description = "There is a hole in the screen..";
+				objects.push(computerScreen);
+			}
+			if(book == null) {
+				book = new Book(1055, 232, 52, 166);
+				book.displayName = "Book";
+				book.description = "Perhaps I should read that..";
+				objects.push(book);
+			}
 			
-			studioLight.displayName = "Studio Light";
-			studioLight.description = "A professional light for exceptional quality.";
-			studioLight.interactable = true;
-			cabinet.displayName = "Cabinet";
-			cabinet.description = "A place to store things.";
-			cabinet.interactable = true;
-			desk.displayName = "Desk";
-			desk.description = "Not quite big enough.";
-			desk.interactable = true;
-			shelf.displayName = "Shelf";
-			shelf.description = "A bunch of collectibles and fan stuff.";
-			shelf.interactable = true;
-			door.displayName = "Door";
-			door.description = "Covered in gross green slime.." + door.description;
-			door.interactable = true;
-			rug.displayName = "Rug";
-			rug.description = "A luxurious red rug.";
-			rug.collidable = false;
-			bed.displayName = "Bed";
-			bed.description = "A standard sized bed.";
-			book.displayName = "Book";
-			book.description = "Perhaps I should read that..";
-			computerScreen.displayName = "Computer Monitor";
-			computerScreen.description = "There is a hole in the screen..";
-
+			if (computerTower == null) {
+				computerTower = new ComputerTower(1143, 274, 69, 91);
+				computerTower.displayName = "Tower";
+				computerTower.description = "A dashing white case with plenty of space inside.";
+				objects.push(computerTower);
+			}
+			
+			if (plant == null) {
+				plant = new Plant(14, 550, 190, 203);
+				plant.displayName = "Plant";
+				plant.description = "It's green, and leafy.";
+				objects.push(plant);
+			}
+			
 			bLayer.addChild(studioLight);
 			bLayer.addChild(cabinet);
 			bLayer.addChild(desk);
@@ -66,27 +120,38 @@ package Rooms
 			fLayer.addChild(bed);
 			bLayer.addChild(book);
 			bLayer.addChild(computerScreen);
+			bLayer.addChild(computerTower);
+			fLayer.addChild(plant);
 			
-			objects.push(studioLight);
-			objects.push(cabinet);
-			objects.push(desk);
-			objects.push(shelf);
-			objects.push(door);
-			objects.push(rug);
-			objects.push(bed);
-			objects.push(book);
+			studioLight.Initialize();
+			cabinet.Initialize();
+			cabinet.UseInitialize();
+			desk.Initialize();
+			shelf.Initialize();
+			door.Initialize();
+			door.UseInitialize();
+			rug.Initialize();
+			bed.Initialize();
+			book.Initialize();
+			book.UseInitialize();
+			computerScreen.Initialize();
+			computerTower.Initialize();
+			plant.Initialize();
 			
-			doors.push(door);
-
 			if (lastRoom != RoomNames.NONE) {
 				for (var i:int = 0; i < doors.length; i++) {
 					var d:Door = doors[i];
 					if (d.roomLink == lastRoom) {
 						GameManager.sean.x = d.x + d.width / 2;
-						GameManager.sean.y = d.y + d.height / 2;
+						GameManager.sean.y = d.y + d.height / 2 + 20;
 					}
+					d = null;
 				}
+				
 			}
+			
+			bLayer = null;
+			fLayer = null;
 			
 		}
 		

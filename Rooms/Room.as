@@ -14,8 +14,9 @@ package Rooms
 	{
 		
 		protected var objects:Array;
-		protected var lastRoom:int
+		public var lastRoom:int
 		protected var doors:Array;
+		public var added:Boolean;
 		
 		public function Room() 
 		{
@@ -25,16 +26,17 @@ package Rooms
 		
 		public function Initialize():void {
 			
+			if(!added) {
+				objects.push(getChildByName("leftCollide") as MovieClip);
+				objects.push(getChildByName("topCollide") as MovieClip);
+				objects.push(getChildByName("rightCollide") as MovieClip);
+				objects.push(getChildByName("bottomCollide") as MovieClip);
+			}
 			
-			objects.push(getChildByName("leftCollide") as MovieClip);
-			objects.push(getChildByName("topCollide") as MovieClip);
-			objects.push(getChildByName("rightCollide") as MovieClip);
-			objects.push(getChildByName("bottomCollide") as MovieClip);
-			
-			var eLayer:MovieClip = getChildByName("entityLayer") as MovieClip;
-			
-			eLayer.addChild(GameManager.sean);
-			
+				var eLayer:MovieClip = getChildByName("entityLayer") as MovieClip;
+				
+				eLayer.addChild(GameManager.sean);
+				eLayer = null;
 		}
 		
 		public function AddObjects():void {

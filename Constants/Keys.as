@@ -9,5 +9,6 @@ package Constants
 		public static var DOWN = 83;
 		public static var SPRINT = 16;
 		public static var USE = 69;
+		public static var INVENTORY = 73;
 	}
 }

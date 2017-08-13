@@ -1,12 +1,16 @@
 package Entity
 {
 	
+	import Items.DoorKey;
+	import Items.Item;
 	import flash.display.MovieClip;
 	import flash.events.KeyboardEvent;
+	import flash.events.MouseEvent;
 	import flash.text.TextField;
 	
 	import Constants.GameManager;
 	import Constants.Keys;
+	import Constants.RoomNames;
 	
 	import Screens.GameScreen;
 	import Screens.Screen;
@@ -25,6 +29,12 @@ package Entity
 		var sprintResetTimer:int = 0;
 		var sprintResetMaxTime:int = 20;
 
+		var inventory:Inventory;
+		
+		var currentItem:Item;
+		
+		private var iKeyUp:Boolean = true;
+		
 		public function Sean(screen:GameScreen)
 		{
 			this.gameScreen = screen;
@@ -35,10 +45,17 @@ package Entity
 			stats = new Stats(10, 100, 100);
 			mouseEnabled = false;
 			description = "Handsome fellow.";
+			
 			displayName = "Sean";
+			
+			inventory = new Inventory(this);
 			
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
+			GameManager.ui.SetInventory(inventory);
+			
+			inventory.AddItem(new DoorKey(RoomNames.MASROOM));
+			
 		}
 		
 		public function Initialize():void {
@@ -48,7 +65,6 @@ package Entity
 
 		
 		public function Update():void {
-
 			if(stats.stamina < stats.maxStamina) {
 				if(sprintResetTimer > 0) {
 					sprintResetTimer--;
@@ -92,16 +108,20 @@ package Entity
 				newY += speed;
 			}
 			
-			if(!moveUp && !moveRight && !moveDown && !moveLeft) {
-				gotoAndStop("Idle");
+			if (!moveUp && !moveRight && !moveDown && !moveLeft) {
+				if(currentLabel != "Idle") {
+					gotoAndStop("Idle");
+				}
 			}
 			
-			if(newX != x || newY != y) {
-				var testSean:Sean = new Sean(gameScreen);
-				testSean.x = newX;
-				testSean.y = newY;
-
-				if(gameScreen.GetRoom().CheckAble(testSean)) {
+			if (newX != x || newY != y) {
+				var lastX:int = x;
+				var lastY:int = y;
+				
+				x = newX;
+				y = newY;
+				
+				if(gameScreen.GetRoom().CheckAble(this)) {
 					if(canSprint) {
 						stats.stamina -= AbilityCosts.RUN;
 						sprintResetTimer = sprintResetMaxTime;
@@ -109,15 +129,27 @@ package Entity
 							stats.stamina = 0;
 						}
 					}
-					x = newX;
-					y = newY;
-					gotoAndStop("Walk");
+					if(currentLabel != "Walk") {
+						gotoAndStop("Walk");
+					}
 				} else {
-					gotoAndStop("Idle");
+					x = lastX;
+					y = lastY;
+					if(currentLabel != "Idle") {
+						gotoAndStop("Idle");
+					}
 				}
 			}
 			
-			GameManager.ui.SetStamina(stats.stamina);
+			newX = 0;
+			newY = 0;
+			
+			speed = 0;
+			canSprint = false;
+			
+			if(GameManager.ui.GetStamina() != stats.stamina) {
+				GameManager.ui.SetStamina(stats.stamina);
+			}
 		}
 		
 		public function KeyDown(e:KeyboardEvent):void {
@@ -161,6 +193,14 @@ package Entity
 			}
 			if(e.keyCode == Keys.DOWN) {
 				moveDown = false;
+			}
+		}
+		
+		public function GetItem():Item {
+			if(inventory.selectedItem != null) {
+				return inventory.selectedItem;
+			} else {
+				return null;
 			}
 		}
 	}

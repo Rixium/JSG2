@@ -25,7 +25,8 @@
 		
 		private function StartGame(e:MouseEvent):void {
 			RemoveFromStage(mainMenu);
-			main.SetScreen(new GameScreen(main));
+			main.SetScreen(new GameScreen());
+			main = null;
 		}
 		
 		private function ShowOptions(e:MouseEvent):void {

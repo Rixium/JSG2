@@ -23,6 +23,8 @@ package Entity
 			mouseOverBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			mouseOverBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
 			mouseOverBounds.addEventListener(MouseEvent.CLICK, MouseClick);
+			
+			mouseOverBounds = null;
 		}
 		
 		public function MouseClick(e:MouseEvent):void {

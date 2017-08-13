@@ -6,6 +6,7 @@ package Screens {
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import flash.system.System;
 	
 	import Constants.GameManager;
 	
@@ -27,17 +28,15 @@ package Screens {
 		private var uiLayer:MovieClip;
 		
 		
-		public function GameScreen(main:Main) {
-			
-			main.gotoAndStop(1, "seanroom");
+		public function GameScreen() {
+			GameManager.main.gotoAndStop(1, "seanroom");
 			
 			GameManager.gameScreen = this;
-			this.main = main;
 			
-			uiLayer = main.getChildByName("uiLayer") as MovieClip;
+			uiLayer = GameManager.main.getChildByName("uiLayer") as MovieClip;
 			uiLayer.mouseEnabled = false;
 			
-			roomLayer = main.getChildByName("roomLayer") as MovieClip;
+			roomLayer = GameManager.main.getChildByName("roomLayer") as MovieClip;
 			
 			var ui:UI = new UI();
 			GameManager.ui = ui;
@@ -48,23 +47,25 @@ package Screens {
 			SetRoom(new SeansRoom(RoomNames.NONE));
 			
 			
-			main.addEventListener(Event.ENTER_FRAME, Update);
+			GameManager.main.addEventListener(Event.ENTER_FRAME, Update);
 			sean.Initialize();
 			
 			
 			
 			mouseInfo = new MouseInfo();
-			mouseInfo.x = main.stage.mouseX;
-			mouseInfo.y = main.stage.mouseY;
+			mouseInfo.x = GameManager.main.stage.mouseX;
+			mouseInfo.y = GameManager.main.stage.mouseY;
 			GameManager.mouseInfo = mouseInfo;
-			uiLayer.addChild(mouseInfo);
+			
 			
 			uiLayer.addChild(ui);
+			uiLayer.addChild(mouseInfo);
+			ui = null;
 		}
 		
 		public function Update(e:Event):void {
-			mouseInfo.x = main.stage.mouseX;
-			mouseInfo.y = main.stage.mouseY;
+			mouseInfo.x = GameManager.main.stage.mouseX;
+			mouseInfo.y = GameManager.main.stage.mouseY;
 			sean.Update();
 		}
 		
@@ -79,8 +80,15 @@ package Screens {
 
 			GameManager.ui.SetDescriptor("", true);
 			
+			if (mouseInfo != null) {
+					mouseInfo.SetText("");
+			}
+			
 			room = r;
 			roomLayer.addChild(room);
+			room.gotoAndPlay(1);
+			GameManager.main.stage.focus = roomLayer;
+			GameManager.main.stage.stageFocusRect = false;
 			room.Initialize();
 			room.AddObjects();
 		}

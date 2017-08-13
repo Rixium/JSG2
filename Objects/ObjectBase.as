@@ -11,6 +11,7 @@ package Objects
 	{
 		
 		public var eBounds:MovieClip;
+		private var useBounds:MovieClip;
 		
 		public var displayName:String;
 		public var description:String;
@@ -21,29 +22,45 @@ package Objects
 		public function ObjectBase()
 		{	
 			eBounds = getChildByName("bounds") as MovieClip;
-			addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
-			addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			addEventListener(MouseEvent.CLICK, MouseClick);
+			useBounds = getChildByName("interactBounds") as MovieClip;
+			useBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
+			useBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
+			useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
+			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
+		}
+		
+		public function Initialize() {
+			eBounds = getChildByName("bounds") as MovieClip;
+			useBounds = getChildByName("interactBounds") as MovieClip;
+			useBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
+			useBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
+			useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
 			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
 		public function OnRemove(e:Event):void {
-			removeEventListener(MouseEvent.MOUSE_OVER, MouseOver);
-			removeEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			removeEventListener(MouseEvent.CLICK, MouseClick);
+			useBounds.removeEventListener(MouseEvent.MOUSE_OVER, MouseOver);
+			useBounds.removeEventListener(MouseEvent.MOUSE_OUT, MouseOut);
+			useBounds.removeEventListener(MouseEvent.CLICK, MouseClick);
 			removeEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
 		public function MouseClick(e:MouseEvent):void {
-			GameManager.ui.SetDescriptor(description, false);
+			if(interactable) {
+				GameManager.ui.SetDescriptor(description, false);
+			}
 		}
 		
 		public function MouseOver(e:MouseEvent):void {
-			GameManager.mouseInfo.SetText(displayName);
+			if(interactable){
+				GameManager.mouseInfo.SetText(displayName);
+			}
 		}
 		
 		public function MouseOut(e:MouseEvent):void {
-			GameManager.mouseInfo.SetText("");
+			if(interactable) {
+				GameManager.mouseInfo.SetText("");
+			}
 		}
 		
 	}

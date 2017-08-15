@@ -41,7 +41,7 @@ package Objects
 				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
 					//textShow = new TextDisplay(useText, x + width / 2, y - 50);
 					showing = true;
-					var character:String = String.fromCharCode(Keys.USE);
+					var character:String = Keys.GetDictionary()[Keys.USE];
 					GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
 				}
 			} else {

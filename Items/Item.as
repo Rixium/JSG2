@@ -10,6 +10,8 @@ package Items
 	{
 		
 		public var itemType:int;
+		public var displayName:String;
+		public var description:String;
 		
 		public function Item() 
 		{

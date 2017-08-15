@@ -12,11 +12,12 @@ package Items
 		
 		private var door:int;
 		
-		public function DoorKey(door:int) 
+		public function DoorKey(door:int, image:int) 
 		{
 			super();
 			this.itemType = ItemTypes.DOORKEY;
 			this.door = door;
+			gotoAndStop(image);
 		}
 		
 		public function GetDoor():int {

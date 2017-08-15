@@ -44,8 +44,7 @@ package Screens {
 			sean = new Sean(this);
 			GameManager.sean = sean;
 
-			SetRoom(new SeansRoom(RoomNames.NONE));
-			
+			SetRoom(RoomNames.GetRoom(RoomNames.NONE, RoomNames.SEANSROOM));
 			
 			GameManager.main.addEventListener(Event.ENTER_FRAME, Update);
 			sean.Initialize();

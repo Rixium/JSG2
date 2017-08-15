@@ -3,7 +3,9 @@ package Entity
 	
 	import Items.DoorKey;
 	import Items.Item;
+	import Objects.Door;
 	import flash.display.MovieClip;
+	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
@@ -11,6 +13,7 @@ package Entity
 	import Constants.GameManager;
 	import Constants.Keys;
 	import Constants.RoomNames;
+	import Constants.ItemImages;
 	
 	import Screens.GameScreen;
 	import Screens.Screen;
@@ -35,8 +38,11 @@ package Entity
 		
 		private var iKeyUp:Boolean = true;
 		
+		private var roll:Boolean = false;
+		
 		public function Sean(screen:GameScreen)
 		{
+			GameManager.sean = this;
 			this.gameScreen = screen;
 			x = 590;
 			y = 420;
@@ -53,9 +59,7 @@ package Entity
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
 			GameManager.ui.SetInventory(inventory);
-			
-			inventory.AddItem(new DoorKey(RoomNames.MASROOM));
-			
+
 		}
 		
 		public function Initialize():void {
@@ -108,7 +112,16 @@ package Entity
 				newY += speed;
 			}
 			
-			if (!moveUp && !moveRight && !moveDown && !moveLeft) {
+			if (roll) {
+				speed = stats.runSpeed;
+				if (scaleX > 0) {
+					newX += speed;
+				} else if (scaleX < 0) {
+					newX -= speed;
+				}
+			}
+			
+			if (!moveUp && !moveRight && !moveDown && !moveLeft && !roll) {
 				if(currentLabel != "Idle") {
 					gotoAndStop("Idle");
 				}
@@ -129,13 +142,14 @@ package Entity
 							stats.stamina = 0;
 						}
 					}
-					if(currentLabel != "Walk") {
+
+					if(currentLabel != "Walk" && !roll) {
 						gotoAndStop("Walk");
 					}
 				} else {
 					x = lastX;
 					y = lastY;
-					if(currentLabel != "Idle") {
+					if(currentLabel != "Idle" && !roll) {
 						gotoAndStop("Idle");
 					}
 				}
@@ -153,7 +167,6 @@ package Entity
 		}
 		
 		public function KeyDown(e:KeyboardEvent):void {
-			
 			if(e.keyCode == Keys.SPRINT) {
 				if(stats.stamina >= AbilityCosts.RUN * 5) {
 					sprint = true;
@@ -175,6 +188,29 @@ package Entity
 				moveDown = true;
 				moveUp = false;
 			}
+			
+			if (e.keyCode == Keys.ROLL && !roll) {
+				if(stats.stamina >= AbilityCosts.ROLL) {
+					roll = true;
+					gotoAndStop("Roll");
+					addEventListener("rollFinished", RollFinished);
+					stats.stamina -= AbilityCosts.ROLL;
+				}
+			}
+			
+			for (var i:int = 0; i < Keys.slots.length; i++) {
+				if (e.keyCode == Keys.slots[i]) {
+					inventory.SetSlot(i);
+					break;
+				}
+			}
+			
+			
+		}
+		
+		private function RollFinished(e:Event) {
+			roll = false;
+			gotoAndStop("Idle");
 		}
 		
 		public function KeyUp(e:KeyboardEvent):void {
@@ -196,12 +232,12 @@ package Entity
 			}
 		}
 		
-		public function GetItem():Item {
-			if(inventory.selectedItem != null) {
-				return inventory.selectedItem;
-			} else {
-				return null;
-			}
+		public function GetInventory():Inventory {
+			return inventory;
+		}
+		
+		public function GetStats():Stats {
+			return stats;
 		}
 	}
 }

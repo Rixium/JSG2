@@ -53,20 +53,26 @@ package Objects
 				channel = null;
 				GameManager.gameScreen.SetRoom(RoomNames.GetRoom(currentRoom, roomLink));
 			} else {
-				if (GameManager.sean.GetItem().itemType == ItemTypes.DOORKEY) {
-					var key:DoorKey = GameManager.sean.GetItem() as DoorKey;
-					if (key.GetDoor() == roomLink) {
-						GameManager.ui.SetDescriptor("You unlocked the " + displayName + "..", false);
-						var unlockSound:DoorUnlockSound = new DoorUnlockSound();;
-						trans = new SoundTransform(GameManager.soundLevel, 0); 
-						channel = unlockSound.play(0, 1, trans);
-						this.description = " and Unlocked.";
-						this.locked = false;
-						unlockSound = null;
-						trans = null;
-						channel = null;
-					}  else {
-						GameManager.ui.SetDescriptor("That doesn't work..", false);
+				if(GameManager.sean.GetInventory().selectedItemSlot.GetItem() != null) {
+					if (GameManager.sean.GetInventory().selectedItemSlot.GetItem().itemType == ItemTypes.DOORKEY) {
+						var key:DoorKey = GameManager.sean.GetInventory().selectedItemSlot.GetItem() as DoorKey;
+						if (key.GetDoor() == roomLink) {
+							GameManager.ui.SetDescriptor("You unlocked the " + displayName + "..", false);
+							var unlockSound:DoorUnlockSound = new DoorUnlockSound();;
+							trans = new SoundTransform(GameManager.soundLevel, 0); 
+							channel = unlockSound.play(0, 1, trans);
+							this.description = " and Unlocked.";
+							this.locked = false;
+							unlockSound = null;
+							trans = null;
+							channel = null;
+							GameManager.sean.GetInventory().selectedItemSlot.RemoveItem();
+						}  else {
+							GameManager.ui.SetDescriptor("That doesn't work..", false);
+						}
+						key = null;
+					} else {
+						GameManager.ui.SetDescriptor("The " + displayName + " is Locked..", false);
 					}
 				} else {
 					GameManager.ui.SetDescriptor("The " + displayName + " is Locked..", false);

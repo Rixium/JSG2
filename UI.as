@@ -2,11 +2,13 @@ package
 {
 	
 	import Entity.Inventory;
+	import UIObjects.HealthBar;
 	import flash.display.MovieClip;
 	import flash.text.TextField;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import Constants.GameManager;
+	import flash.geom.ColorTransform;
 	
 	public class UI extends MovieClip
 	{
@@ -20,11 +22,25 @@ package
 		private var stamina:int;
 		private var health:int;
 		
+		private var healthBar:HealthBar = new HealthBar();
+		private var staminaBar:HealthBar = new HealthBar();
+		
 		public function UI()
 		{
 			mouseEnabled = false;
 			//mouseChildren = false;
 			descriptionTimer.addEventListener(TimerEvent.TIMER, ClearDescriptor);
+			
+			healthBar.x = 10;
+			healthBar.y = 10;
+			addChild(healthBar);
+			
+			var myColorTransform = new ColorTransform();
+			myColorTransform.color = 0x32CD32;
+			staminaBar.barInside.transform.colorTransform = myColorTransform;
+			staminaBar.x = 10;
+			staminaBar.y = 10 + staminaBar.height + 10;
+			addChild(staminaBar);
 		}
 		
 		public function SetDescriptor(s:String, permenant:Boolean):void {
@@ -38,18 +54,22 @@ package
 			}
 		}
 		
+		public function Upgrade() {
+			staminaBar.Upgrade(10);
+		}
+		
 		private function ClearDescriptor(e:TimerEvent) {
 			objectDescriptor.text = "";
 		}
 		
 		public function SetStamina(stamina:int):void {
 			this.stamina = stamina;
-			staminaDisplay.text = "Stamina: " + stamina;
+			staminaBar.Set(stamina, GameManager.sean.GetStats().maxStamina);
 		}
 		
 		public function SetHealth(health:int):void {
 			this.health = health;
-			healthDisplay.text = "Health: " + health;
+			healthBar.Set(health, GameManager.sean.GetStats().maxHealth);
 		}
 		
 		public function SetInventory(i:Inventory):void {

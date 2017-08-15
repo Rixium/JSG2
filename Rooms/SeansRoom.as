@@ -6,9 +6,8 @@ package Rooms
 	 */
 	
 	import Objects.*;
-	import Constants.RoomNames;
-	import Constants.GameManager;
-	import Constants.DoorTypes;
+	import Constants.*;
+	import Items.*;
 	
 	public class SeansRoom extends Room
 	{
@@ -48,6 +47,12 @@ package Rooms
 				cabinet.description = "A place to store things.";
 				cabinet.interactable = true;
 				objects.push(cabinet);
+				
+				var key:DoorKey = new DoorKey(RoomNames.MASROOM, ItemImages.MASKEY);
+				key.displayName = "Heart Key";
+				key.description = "Opens the door to Ma's Room.";
+				cabinet.SetItem(key);
+				key = null;
 			}
 			if(desk == null) {
 				desk = new Table(820, 223, 313, 156);
@@ -85,7 +90,7 @@ package Rooms
 				objects.push(bed);
 			}
 			if(computerScreen == null) {
-				computerScreen = new ComputerScreen(905, 149, 140, 140);
+				computerScreen = new ComputerScreen(905, 139, 140, 130);
 				computerScreen.displayName = "Monitor";
 				computerScreen.description = "There is a hole in the screen..";
 				objects.push(computerScreen);

@@ -45,7 +45,7 @@ package Items
 			textBox2.setTextFormat(f);
 			
 			var itemFindSound:ItemFindSound = new ItemFindSound();;
-			var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0); 
+			var trans:SoundTransform = new SoundTransform(0.2, 0); 
 			var channel:SoundChannel = itemFindSound.play(0, 1, trans);
 			itemFindSound = null;
 			trans = null;

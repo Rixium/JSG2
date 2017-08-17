@@ -3,17 +3,16 @@ package Entity
 	
 	import Items.DoorKey;
 	import Items.Item;
+	import Items.WeaponItem;
 	import Objects.Door;
+	import Weapons.Weapon;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
 	
-	import Constants.GameManager;
-	import Constants.Keys;
-	import Constants.RoomNames;
-	import Constants.ItemImages;
+	import Constants.*;
 	
 	import Screens.GameScreen;
 	import Screens.Screen;
@@ -33,6 +32,8 @@ package Entity
 		var sprintResetMaxTime:int = 20;
 
 		var inventory:Inventory;
+
+		var weaponSlot:WeaponSlot;
 		
 		var currentItem:Item;
 		
@@ -59,12 +60,14 @@ package Entity
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
 			GameManager.ui.SetInventory(inventory);
-
 		}
 		
 		public function Initialize():void {
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_UP, KeyUp);
+			gotoAndStop("Idle");
+			weaponSlot = new WeaponSlot();
+			idleAnimation.weaponHolder.addChild(weaponSlot);
 		}
 
 		
@@ -124,6 +127,7 @@ package Entity
 			if (!moveUp && !moveRight && !moveDown && !moveLeft && !roll) {
 				if(currentLabel != "Idle") {
 					gotoAndStop("Idle");
+					idleAnimation.weaponHolder.addChild(weaponSlot);
 				}
 			}
 			
@@ -145,12 +149,14 @@ package Entity
 
 					if(currentLabel != "Walk" && !roll) {
 						gotoAndStop("Walk");
+						walkAnimation.bodyAnimation.weaponHolder.addChild(weaponSlot);
 					}
 				} else {
 					x = lastX;
 					y = lastY;
 					if(currentLabel != "Idle" && !roll) {
 						gotoAndStop("Idle");
+						idleAnimation.weaponHolder.addChild(weaponSlot);
 					}
 				}
 			}
@@ -205,12 +211,12 @@ package Entity
 				}
 			}
 			
-			
 		}
 		
 		private function RollFinished(e:Event) {
 			roll = false;
 			gotoAndStop("Idle");
+			idleAnimation.weaponHolder.addChild(weaponSlot);
 		}
 		
 		public function KeyUp(e:KeyboardEvent):void {
@@ -238,6 +244,10 @@ package Entity
 		
 		public function GetStats():Stats {
 			return stats;
+		}
+		
+		public function SetWeapon(weapon:Weapon) {
+			weaponSlot.SetWeapon(weapon);
 		}
 	}
 }

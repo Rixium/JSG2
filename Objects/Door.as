@@ -6,6 +6,7 @@ package Objects
 	import Constants.ItemTypes;
 	import Sounds.DoorCloseSound;
 	import Sounds.DoorUnlockSound;
+	import Sounds.LockedDoorSound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
 	import Items.DoorKey;
@@ -34,13 +35,7 @@ package Objects
 			this.locked = locked;
 			
 			this.doorType = doorType;
-			
-			
-			if(locked) {
-				this.description = " and Locked.";
-			} else {
-				this.description = " and Unlocked.";
-			}
+
 		}
 		
 		protected override function Use():void {
@@ -61,7 +56,6 @@ package Objects
 							var unlockSound:DoorUnlockSound = new DoorUnlockSound();;
 							trans = new SoundTransform(GameManager.soundLevel, 0); 
 							channel = unlockSound.play(0, 1, trans);
-							this.description = " and Unlocked.";
 							this.locked = false;
 							unlockSound = null;
 							trans = null;
@@ -72,9 +66,21 @@ package Objects
 						}
 						key = null;
 					} else {
+						var lockedDoorSound2:LockedDoorSound = new LockedDoorSound();;
+						trans = new SoundTransform(GameManager.soundLevel, 0); 
+						channel = lockedDoorSound2.play(0, 1, trans);
+						lockedDoorSound2 = null;
+						trans = null;
+						channel = null;
 						GameManager.ui.SetDescriptor("The " + displayName + " is Locked..", false);
 					}
 				} else {
+						var lockedDoorSound:LockedDoorSound = new LockedDoorSound();;
+						trans = new SoundTransform(GameManager.soundLevel, 0); 
+						channel = lockedDoorSound.play(0, 1, trans);
+						lockedDoorSound = null;
+						trans = null;
+						channel = null;
 					GameManager.ui.SetDescriptor("The " + displayName + " is Locked..", false);
 				}
 				

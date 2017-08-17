@@ -13,10 +13,11 @@ package Items
 		public var displayName:String;
 		public var description:String;
 		
-		public function Item() 
+		public function Item(image:int, type:int) 
 		{
 			super();
-			
+			gotoAndStop(image);
+			itemType = type;
 		}
 		
 	}

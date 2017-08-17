@@ -8,6 +8,7 @@ package Rooms
 	import Objects.*;
 	import Constants.*;
 	import Items.*;
+	import Weapons.Weapon;
 	
 	public class SeansRoom extends Room
 	{
@@ -23,6 +24,7 @@ package Rooms
 		var book:Book;
 		var computerTower:ComputerTower;
 		var plant:Plant;
+		var camera:Cam;
 		
 		public function SeansRoom(lastRoom:int) 
 		{
@@ -41,19 +43,23 @@ package Rooms
 				studioLight.interactable = true;
 				objects.push(studioLight);
 			}
+			
 			if(cabinet == null) {
 				cabinet = new Chest(700, 226, 120, 190);
 				cabinet.displayName = "Cabinet";
 				cabinet.description = "A place to store things.";
 				cabinet.interactable = true;
 				objects.push(cabinet);
-				
-				var key:DoorKey = new DoorKey(RoomNames.MASROOM, ItemImages.MASKEY);
-				key.displayName = "Heart Key";
-				key.description = "Opens the door to Ma's Room.";
+
+				var key:DoorKey = new DoorKey(RoomNames.HALLWAY, ItemImages.STANDARDKEY);
+				key.displayName = "Spare Key";
+				key.description = "A copy of the key for Sean's Door.";
 				cabinet.SetItem(key);
 				key = null;
 			}
+			
+			
+			
 			if(desk == null) {
 				desk = new Table(820, 223, 313, 156);
 				desk.displayName = "Desk";
@@ -69,9 +75,9 @@ package Rooms
 				objects.push(shelf);
 			}
 			if(door == null) {
-				door = new Door(120, 61, 125, 312, false, RoomNames.HALLWAY, RoomNames.SEANSROOM, DoorTypes.SLIME);
+				door = new Door(120, 61, 125, 312, true, RoomNames.HALLWAY, RoomNames.SEANSROOM, DoorTypes.SLIME);
 				door.displayName = "Door";
-				door.description = "Covered in gross green slime.." + door.description;
+				door.description = "Covered in gross green slime..";
 				door.interactable = true;
 				objects.push(door);
 				doors.push(door);
@@ -116,6 +122,13 @@ package Rooms
 				objects.push(plant);
 			}
 			
+			if (camera == null) {
+				camera = new Cam(834, 129, 84, 119);
+				camera.displayName = "Camera";
+				camera.description = "One of the best Cameras for Youtube Video."
+				objects.push(camera);
+			}
+			
 			bLayer.addChild(studioLight);
 			bLayer.addChild(cabinet);
 			bLayer.addChild(desk);
@@ -126,6 +139,7 @@ package Rooms
 			bLayer.addChild(book);
 			bLayer.addChild(computerScreen);
 			bLayer.addChild(computerTower);
+			bLayer.addChild(camera);
 			fLayer.addChild(plant);
 			
 			studioLight.Initialize();
@@ -142,6 +156,7 @@ package Rooms
 			computerScreen.Initialize();
 			computerTower.Initialize();
 			plant.Initialize();
+			camera.Initialize();
 			
 			if (lastRoom != RoomNames.NONE) {
 				for (var i:int = 0; i < doors.length; i++) {

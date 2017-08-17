@@ -14,8 +14,7 @@ package Items
 		
 		public function DoorKey(door:int, image:int) 
 		{
-			super();
-			this.itemType = ItemTypes.DOORKEY;
+			super(image, ItemTypes.DOORKEY);
 			this.door = door;
 			gotoAndStop(image);
 		}

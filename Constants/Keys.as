@@ -15,6 +15,7 @@ package Constants
 		public static var USE = 69;
 		public static var INVENTORY = 73;
 		public static var ROLL = 32;
+		public static var EQUIP = 81;
 		
 		public static var KeyToChar:Array = new Array("null", "1",  "2", "3", "4", "5", "6", "7", "Backspace", "Tab", "10", "11", "12", "Enter", "14", "15", "Shift", "Ctrl", 
 		"Alt", "Break", "Caps Lock", "21", "22", "23", "24", "25", "26", "Esc", "28", "29", "30", "31", "Space", "Page Up", "Page Down", "End", "Home", 

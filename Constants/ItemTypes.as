@@ -7,7 +7,8 @@ package Constants
 	public class ItemTypes 
 	{
 		
-		public static var DOORKEY = 0;
+		public static var DOORKEY = 1;
+		public static var WEAPON = 2;
 		
 	}
 

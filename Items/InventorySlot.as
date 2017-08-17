@@ -1,11 +1,11 @@
 package Items 
 {
+	import Weapons.Weapon;
 	import fl.motion.Color;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
-	import Constants.GameManager;
-	import Constants.Keys;
+	import Constants.*;
 	import flash.filters.GlowFilter;
 	import flash.geom.ColorTransform;
 	import flash.filters.BitmapFilterQuality;
@@ -65,6 +65,16 @@ package Items
 				glowBox.visible = true;
 				GameManager.sean.GetInventory().selectedItemSlot = this;
 			}
+			if (item != null) {
+				if (item.itemType == ItemTypes.WEAPON) {
+					var itemGet:WeaponItem = item as WeaponItem;
+					var weapon:Weapon = new Weapon(itemGet.weaponType, itemGet.power);
+					
+					GameManager.sean.SetWeapon(weapon);
+					weapon = null;
+					itemGet = null;
+				}
+			}
 		}
 		
 		public function Deselect():void {
@@ -89,6 +99,21 @@ package Items
 			item.width = 64;
 			item.height = 64;
 			item.mouseEnabled = false;
+			
+			if (GameManager.sean.GetInventory().selectedItemSlot != null) {
+				if (GameManager.sean.GetInventory().selectedItemSlot == this) {
+					if (item != null) {
+						if (item.itemType == ItemTypes.WEAPON) {
+							var itemGet:WeaponItem = item as WeaponItem;
+							var weapon:Weapon = new Weapon(itemGet.weaponType, itemGet.power);
+							
+							GameManager.sean.SetWeapon(weapon);
+							weapon = null;
+							itemGet = null;
+						}
+					}
+				}
+			}
 		}
 	}
 

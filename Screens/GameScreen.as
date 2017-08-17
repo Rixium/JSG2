@@ -6,6 +6,7 @@ package Screens {
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import flash.geom.Rectangle;
 	import flash.system.System;
 	
 	import Constants.GameManager;
@@ -46,10 +47,12 @@ package Screens {
 
 			SetRoom(RoomNames.GetRoom(RoomNames.NONE, RoomNames.SEANSROOM));
 			
-			GameManager.main.addEventListener(Event.ENTER_FRAME, Update);
+			
 			sean.Initialize();
+			GameManager.main.addEventListener(Event.ENTER_FRAME, Update);
 			
-			
+			// If I decide on camera.. Maybe not.
+			//roomLayer.scrollRect = new Rectangle(sean.x - GameManager.main.stage.stageWidth / 2, sean.y - GameManager.main.stage.stageHeight / 2, GameManager.main.stage.stageWidth, GameManager.main.stage.stageHeight);
 			
 			mouseInfo = new MouseInfo();
 			mouseInfo.x = GameManager.main.stage.mouseX;
@@ -66,6 +69,9 @@ package Screens {
 			mouseInfo.x = GameManager.main.stage.mouseX;
 			mouseInfo.y = GameManager.main.stage.mouseY;
 			sean.Update();
+			
+			// Maybe keep?
+			//roomLayer.scrollRect = new Rectangle(sean.x - GameManager.main.stage.stageWidth / 2, sean.y - GameManager.main.stage.stageHeight / 2, GameManager.main.stage.stageWidth, GameManager.main.stage.stageHeight);
 		}
 		
 		public function GetRoom():Room {

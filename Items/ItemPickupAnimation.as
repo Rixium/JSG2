@@ -30,7 +30,7 @@ package Items
 			itemLayer.addChild(item);
 			GameManager.main.addChild(this);
 			addEventListener("Finished", RemoveFromStage);
-			GameManager.main.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			
 			var itemGetText:MovieClip = getChildByName("itemGetText") as MovieClip;
 			var itemDesText:MovieClip = getChildByName("itemDesText") as MovieClip;
@@ -60,11 +60,11 @@ package Items
 			item = null;
 			GameManager.main.removeChild(this);
 			removeEventListener("Finished", RemoveFromStage);
-			GameManager.main.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 		}
 		
 		public function KeyDown(e:Event) {
-			GameManager.main.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			gotoAndPlay("Finish");
 		}
 	}

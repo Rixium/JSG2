@@ -1,10 +1,14 @@
 package Entity
 {
 	
+	import Chat.ChatLine;
+	import Chat.Conversation;
+	import Chat.Phone;
 	import Items.DoorKey;
 	import Items.Item;
 	import Items.WeaponItem;
 	import Objects.Door;
+	import Rooms.MasRoom;
 	import Weapons.Weapon;
 	import flash.display.MovieClip;
 	import flash.events.Event;
@@ -37,9 +41,13 @@ package Entity
 		
 		var currentItem:Item;
 		
+		public var phone:Phone;
+		
 		private var iKeyUp:Boolean = true;
 		
 		private var roll:Boolean = false;
+		
+		public var reading:Boolean = false;
 		
 		public function Sean(screen:GameScreen)
 		{
@@ -56,6 +64,7 @@ package Entity
 			displayName = "Sean";
 			
 			inventory = new Inventory(this);
+			phone = new Phone();
 			
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
@@ -72,6 +81,8 @@ package Entity
 
 		
 		public function Update():void {
+			phone.Check();
+			
 			if(stats.stamina < stats.maxStamina) {
 				if(sprintResetTimer > 0) {
 					sprintResetTimer--;
@@ -173,44 +184,45 @@ package Entity
 		}
 		
 		public function KeyDown(e:KeyboardEvent):void {
-			if(e.keyCode == Keys.SPRINT) {
-				if(stats.stamina >= AbilityCosts.RUN * 5) {
-					sprint = true;
+			if(!reading) {
+				if(e.keyCode == Keys.SPRINT) {
+					if(stats.stamina >= AbilityCosts.RUN * 5) {
+						sprint = true;
+					}
+				}
+				
+				if(e.keyCode == Keys.LEFT) {
+					moveLeft = true;
+					moveRight = false;
+				} else if (e.keyCode == Keys.RIGHT) {
+					moveRight = true;
+					moveLeft = false;
+				}
+				
+				if(e.keyCode == Keys.UP) {
+					moveUp = true;
+					moveDown = false;
+				} else if (e.keyCode == Keys.DOWN) {
+					moveDown = true;
+					moveUp = false;
+				}
+				
+				if (e.keyCode == Keys.ROLL && !roll) {
+					if(stats.stamina >= AbilityCosts.ROLL) {
+						roll = true;
+						gotoAndStop("Roll");
+						addEventListener("rollFinished", RollFinished);
+						stats.stamina -= AbilityCosts.ROLL;
+					}
+				}
+				
+				for (var i:int = 0; i < Keys.slots.length; i++) {
+					if (e.keyCode == Keys.slots[i]) {
+						inventory.SetSlot(i);
+						break;
+					}
 				}
 			}
-			
-			if(e.keyCode == Keys.LEFT) {
-				moveLeft = true;
-				moveRight = false;
-			} else if (e.keyCode == Keys.RIGHT) {
-				moveRight = true;
-				moveLeft = false;
-			}
-			
-			if(e.keyCode == Keys.UP) {
-				moveUp = true;
-				moveDown = false;
-			} else if (e.keyCode == Keys.DOWN) {
-				moveDown = true;
-				moveUp = false;
-			}
-			
-			if (e.keyCode == Keys.ROLL && !roll) {
-				if(stats.stamina >= AbilityCosts.ROLL) {
-					roll = true;
-					gotoAndStop("Roll");
-					addEventListener("rollFinished", RollFinished);
-					stats.stamina -= AbilityCosts.ROLL;
-				}
-			}
-			
-			for (var i:int = 0; i < Keys.slots.length; i++) {
-				if (e.keyCode == Keys.slots[i]) {
-					inventory.SetSlot(i);
-					break;
-				}
-			}
-			
 		}
 		
 		private function RollFinished(e:Event) {

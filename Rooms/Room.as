@@ -5,6 +5,7 @@ package Rooms
 	import Entity.EntityBase;
 	import Objects.*;
 	
+	
 	/**
 	 * ...
 	 * @author Rixium
@@ -17,6 +18,8 @@ package Rooms
 		public var lastRoom:int
 		protected var doors:Array;
 		public var added:Boolean;
+		
+		protected var firstVisit:Boolean = true;
 		
 		public function Room() 
 		{
@@ -41,6 +44,27 @@ package Rooms
 		
 		public function AddObjects():void {
 			
+		}
+		
+		public function Clean():void {
+			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
+			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
+			
+			for (var i:int = 0; i < objects.length; i++) {
+				var object:ObjectBase = objects[i];
+				if (object.usable) {
+					var useObject:UsableObject = objects[i];
+					useObject.RemoveListeners(null);
+					useObject = null;
+				}
+				object = null;
+			}
+			while (bLayer.numChildren > 0) {
+				bLayer.removeChildAt(0);
+			}
+			while (fLayer.numChildren > 0) {
+				fLayer.removeChildAt(0);
+			}
 		}
 		
 		public function CheckAble(e:EntityBase):Boolean {

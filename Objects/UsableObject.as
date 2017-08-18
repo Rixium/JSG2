@@ -18,12 +18,14 @@ package Objects
 		protected var useText:String;
 		private var textShow:TextDisplay;
 		private var showing:Boolean;
+		private var canUse:Boolean = true;
 		
 		public function UsableObject() 
 		{
 			super();
 			this.usable = true;
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_UP, KeyUp);
 			this.useBounds = getChildByName("useBounds") as MovieClip;
 			addEventListener(Event.ENTER_FRAME, Update);
 			addEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
@@ -37,7 +39,7 @@ package Objects
 		}
 		
 		public function Update(e:Event):void {
-			if(!showing) {
+			if(!showing && !GameManager.sean.phone.ringing) {
 				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
 					//textShow = new TextDisplay(useText, x + width / 2, y - 50);
 					showing = true;
@@ -45,7 +47,7 @@ package Objects
 					GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
 				}
 			} else {
-				if (!GameManager.sean.eBounds.hitTestObject(useBounds)) {
+				if (!GameManager.sean.eBounds.hitTestObject(useBounds) && !GameManager.sean.phone.ringing) {
 					//textShow.Destroy();
 					showing = false;
 					GameManager.ui.SetDescriptor("", true);
@@ -56,17 +58,25 @@ package Objects
 		}
 		
 		public function RemoveListeners(e:Event):void {
+			canUse = false;
 			removeEventListener(Event.ENTER_FRAME, Update);
-			removeEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
 			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			removeEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
 		}
 		
 		
 		public function KeyDown(e:KeyboardEvent):void {
-			if (e.keyCode == Keys.USE) {
+			if (e.keyCode == Keys.USE && canUse && !GameManager.sean.phone.ringing) {
+				canUse = false;
 				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
 					Use();
 				}
+			}
+		}
+		
+		public function KeyUp(e:KeyboardEvent):void {
+			if (e.keyCode == Keys.USE) {
+				canUse = true;
 			}
 		}
 		

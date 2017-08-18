@@ -46,7 +46,7 @@ package Objects
 				closeDoorSound = null;
 				trans = null;
 				channel = null;
-				GameManager.gameScreen.SetRoom(RoomNames.GetRoom(currentRoom, roomLink));
+				GameManager.gameScreen.SetRoom(currentRoom, roomLink);
 			} else {
 				if(GameManager.sean.GetInventory().selectedItemSlot.GetItem() != null) {
 					if (GameManager.sean.GetInventory().selectedItemSlot.GetItem().itemType == ItemTypes.DOORKEY) {

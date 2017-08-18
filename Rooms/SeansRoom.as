@@ -36,6 +36,11 @@ package Rooms
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 			
+			if (firstVisit) {
+				GameManager.sean.phone.InitiateConversation(Conversations.conversation1);
+				firstVisit = false;
+			}
+			
 			if(studioLight == null) {
 				studioLight = new StudioLight(588, 88, 106, 280);
 				studioLight.displayName = "Studio Light";
@@ -101,11 +106,13 @@ package Rooms
 				computerScreen.description = "There is a hole in the screen..";
 				objects.push(computerScreen);
 			}
-			if(book == null) {
-				book = new Book(1055, 232, 52, 166);
+			if (book == null) {
+				var info:BookInfo = new BookInfo(BookTexts.SEANSROOMBOOK[0], BookTexts.SEANSROOMBOOK[1]);
+				book = new Book(1055, 232, 52, 166, info);
 				book.displayName = "Book";
 				book.description = "Perhaps I should read that..";
 				objects.push(book);
+				info = null;
 			}
 			
 			if (computerTower == null) {

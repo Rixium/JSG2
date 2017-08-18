@@ -9,7 +9,9 @@ package Objects
 	public class Book extends UsableObject 
 	{
 		
-		public function Book(x:int, y:int, w:int, h:int) 
+		private var info:BookInfo;
+		
+		public function Book(x:int, y:int, w:int, h:int, info:BookInfo) 
 		{
 			super();
 			
@@ -20,10 +22,13 @@ package Objects
 			this.interactable = true;
 			this.collidable = false;
 			this.useText = "Read";
-			
+			this.info = info;
 		}
 		
-		
+		override protected function Use():void 
+		{
+			info.OpenBook();
+		}
 		
 	}
 

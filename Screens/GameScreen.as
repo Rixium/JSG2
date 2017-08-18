@@ -45,7 +45,7 @@ package Screens {
 			sean = new Sean(this);
 			GameManager.sean = sean;
 
-			SetRoom(RoomNames.GetRoom(RoomNames.NONE, RoomNames.SEANSROOM));
+			SetRoom(RoomNames.NONE, RoomNames.SEANSROOM);
 			
 			
 			sean.Initialize();
@@ -78,11 +78,14 @@ package Screens {
 			return this.room;
 		}
 		
-		public function SetRoom(r:Room):void {
-			if(room != null) {
+		public function SetRoom(currentRoom:int, newRoom:int):void {
+			if (room != null) {
+				room.Clean();
 				roomLayer.removeChild(room);
 			}
 
+			var r:Room = RoomNames.GetRoom(currentRoom, newRoom);
+			
 			GameManager.ui.SetDescriptor("", true);
 			
 			if (mouseInfo != null) {

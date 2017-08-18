@@ -11,6 +11,7 @@ package Rooms
 	
 	import Constants.GameManager;
 	import Constants.DoorTypes;
+	import Constants.Conversations;
 	
 	public class HallwayRoom extends Room
 	{
@@ -31,6 +32,11 @@ package Rooms
 			
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
+			
+			if (firstVisit) {
+				GameManager.sean.phone.InitiateConversation(Conversations.conversation2);
+				firstVisit = false;
+			}
 			
 			if(door == null) {
 				door = new Door(973, 89, 125, 312, false, RoomNames.SEANSROOM, RoomNames.HALLWAY, DoorTypes.CLEAN);

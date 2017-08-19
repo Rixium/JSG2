@@ -25,7 +25,7 @@ package Objects
 			useBounds = getChildByName("interactBounds") as MovieClip;
 			useBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			useBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
+			//useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
 			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
@@ -34,14 +34,14 @@ package Objects
 			useBounds = getChildByName("interactBounds") as MovieClip;
 			useBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			useBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
+			//useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
 			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
 		public function OnRemove(e:Event):void {
 			useBounds.removeEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			useBounds.removeEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			useBounds.removeEventListener(MouseEvent.CLICK, MouseClick);
+			//useBounds.removeEventListener(MouseEvent.CLICK, MouseClick);
 			removeEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
@@ -52,14 +52,16 @@ package Objects
 		}
 		
 		public function MouseOver(e:MouseEvent):void {
-			if(interactable){
+			if(interactable && !GameManager.sean.phone.ringing){
 				GameManager.mouseInfo.SetText(displayName);
+				GameManager.ui.SetDescriptor(description, false);
 			}
 		}
 		
 		public function MouseOut(e:MouseEvent):void {
-			if(interactable) {
+			if(interactable && !GameManager.sean.phone.ringing) {
 				GameManager.mouseInfo.SetText("");
+				GameManager.ui.SetDescriptor("", true);
 			}
 		}
 		

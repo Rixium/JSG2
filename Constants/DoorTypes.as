@@ -13,6 +13,9 @@ package Constants
 		public static var HATCHBOTTOM = 4;
 		public static var HATCHTOP = 5;
 		public static var SIDE = 6;
+		public static var STAIRSHALL = 7;
+		public static var STAIRDOOR = 8;
+		public static var STAIRSUP = 9;
 		
 	}
 

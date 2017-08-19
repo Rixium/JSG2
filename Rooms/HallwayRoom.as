@@ -17,6 +17,7 @@ package Rooms
 	{
 		
 		private var door:Door;
+		private var staircase:Door;
 		private var masDoor:Door;
 		private var atticDoor:Door;
 		private var hallArt:Art;
@@ -66,12 +67,23 @@ package Rooms
 				hallArt.description = "A painting of heaven and hell.. It's upside down.";
 			}
 			
+			if (staircase == null) {
+				staircase = new Door(5, 300, 383, 264, false, RoomNames.LIVINGROOM, RoomNames.HALLWAY, DoorTypes.STAIRSHALL);
+				staircase.displayName = "Staircase";
+				staircase.description = "A staircase to the ground floor.";
+				doors.push(staircase);
+				objects.push(staircase);
+				staircase.collidable = true;
+			}
+			
 			door.Initialize();
 			door.UseInitialize();
 			masDoor.Initialize();
 			masDoor.UseInitialize();
 			atticDoor.Initialize();
 			atticDoor.UseInitialize();
+			staircase.Initialize();
+			staircase.UseInitialize();
 			
 			hallArt.Initialize();
 				
@@ -79,6 +91,7 @@ package Rooms
 			bLayer.addChild(door);
 			bLayer.addChild(masDoor);
 			bLayer.addChild(hallArt);
+			fLayer.addChild(staircase);
 
 			if (lastRoom != RoomNames.NONE) {
 				for (var i:int = 0; i < doors.length; i++) {
@@ -87,7 +100,16 @@ package Rooms
 					if (d.roomLink == lastRoom) {
 						GameManager.sean.x = d.x + d.width / 2;
 						GameManager.sean.y = d.y + d.height / 2 + 20;
+						
+						if (d.doorType == DoorTypes.STAIRSHALL) {
+							GameManager.sean.x = d.x + d.width
+							GameManager.sean.y = d.y + d.height / 2 - 20;
+							GameManager.sean.scaleX = 2;
+						}
 					}
+					
+					
+						
 					 d = null;
 				}
 			}

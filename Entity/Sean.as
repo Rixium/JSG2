@@ -9,12 +9,19 @@ package Entity
 	import Items.WeaponItem;
 	import Objects.Door;
 	import Rooms.MasRoom;
+	import Sounds.SlashFour;
+	import Sounds.SlashOne;
+	import Sounds.SlashThree;
+	import Sounds.SlashTwo;
 	import Weapons.Weapon;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.media.Sound;
 	import flash.text.TextField;
+	import flash.media.SoundChannel;
+	import flash.media.SoundTransform;
 	
 	import Constants.*;
 	
@@ -48,6 +55,9 @@ package Entity
 		private var roll:Boolean = false;
 		
 		public var reading:Boolean = false;
+		var attacking:Boolean = false;
+		
+		
 		
 		public function Sean(screen:GameScreen)
 		{
@@ -69,16 +79,44 @@ package Entity
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
 			GameManager.ui.SetInventory(inventory);
+			
+			
 		}
 		
 		public function Initialize():void {
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_UP, KeyUp);
+			GameManager.main.addEventListener(MouseEvent.CLICK, Attack);
 			gotoAndStop("Idle");
 			weaponSlot = new WeaponSlot();
-			idleAnimation.weaponHolder.addChild(weaponSlot);
 		}
 
+		function randomRange(minNum:Number, maxNum:Number):Number 
+		{
+			return (Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum);
+		}
+		
+		private function Attack(e:MouseEvent) {
+			if(stats.stamina >= AbilityCosts.ATTACK) {
+				if (!attacking && weaponSlot.GetWeapon() != null && !roll && currentLabel == "Idle" && !phone.inCall) {
+					attacking = true;
+					seanBody.body.gotoAndPlay("Attack1");
+					seanBody.addEventListener("AttackFinished", EndAttack);
+					stats.stamina -= AbilityCosts.ATTACK;
+				}
+			}
+		}
+		
+		private function EndAttack(e:Event) {
+				attacking = false;
+				if (seanBody.legs.currentLabel == "Walk") {
+					seanBody.removeEventListener("AttackFinished", EndAttack);
+					seanBody.body.gotoAndPlay("Walk");
+				} else if (seanBody.legs.currentLabel == "Idle") {
+					seanBody.body.gotoAndStop("Idle");
+					seanBody.removeEventListener("AttackFinished", EndAttack);
+				}
+		}
 		
 		public function Update():void {
 			phone.Check();
@@ -136,10 +174,7 @@ package Entity
 			}
 			
 			if (!moveUp && !moveRight && !moveDown && !moveLeft && !roll) {
-				if(currentLabel != "Idle") {
-					gotoAndStop("Idle");
-					idleAnimation.weaponHolder.addChild(weaponSlot);
-				}
+				StartIdle();
 			}
 			
 			if (newX != x || newY != y) {
@@ -158,16 +193,14 @@ package Entity
 						}
 					}
 
-					if(currentLabel != "Walk" && !roll) {
-						gotoAndStop("Walk");
-						walkAnimation.bodyAnimation.weaponHolder.addChild(weaponSlot);
+					if (!roll && !attacking) {
+						StartWalk();
 					}
 				} else {
 					x = lastX;
 					y = lastY;
-					if(currentLabel != "Idle" && !roll) {
-						gotoAndStop("Idle");
-						idleAnimation.weaponHolder.addChild(weaponSlot);
+					if(!roll && !attacking) {
+						StartIdle();
 					}
 				}
 			}
@@ -180,6 +213,26 @@ package Entity
 			
 			if(GameManager.ui.GetStamina() != stats.stamina) {
 				GameManager.ui.SetStamina(stats.stamina);
+			}
+		}
+		
+		private function StartWalk() {
+			if (currentLabel != "Idle") {
+				gotoAndStop("Idle");
+			}
+			
+			if (weaponSlot.GetWeapon() != null) {
+				AddWeaponToHand();
+			}
+			
+			if(seanBody.body.currentLabel != "Walk" && !attacking) {
+				seanBody.body.gotoAndPlay("Walk");
+			}
+			if(seanBody.legs.currentLabel != "Walk") {
+				seanBody.legs.gotoAndPlay("Walk");
+			}
+			if(seanBody.head.currentLabel != "Walk") {
+				seanBody.head.gotoAndPlay("Walk");
 			}
 		}
 		
@@ -208,7 +261,10 @@ package Entity
 				}
 				
 				if (e.keyCode == Keys.ROLL && !roll) {
-					if(stats.stamina >= AbilityCosts.ROLL) {
+					if (stats.stamina >= AbilityCosts.ROLL) {
+						if (attacking) {
+							EndAttack(null);
+						}
 						roll = true;
 						gotoAndStop("Roll");
 						addEventListener("rollFinished", RollFinished);
@@ -227,8 +283,25 @@ package Entity
 		
 		private function RollFinished(e:Event) {
 			roll = false;
-			gotoAndStop("Idle");
-			idleAnimation.weaponHolder.addChild(weaponSlot);
+			if(!moveLeft && !moveRight && !moveUp && !moveDown) {
+				StartIdle();
+			} else {
+				StartWalk();
+			}
+		}
+		
+		private function StartIdle() {
+			if (currentLabel != "Idle") {
+				gotoAndStop("Idle");
+			}
+			if (weaponSlot.GetWeapon() != null) {
+				AddWeaponToHand();
+			}
+			seanBody.head.gotoAndPlay("Idle");
+			if(!attacking) {
+				seanBody.body.gotoAndPlay("Idle");
+			}
+			seanBody.legs.gotoAndPlay("Idle");
 		}
 		
 		public function KeyUp(e:KeyboardEvent):void {
@@ -260,6 +333,15 @@ package Entity
 		
 		public function SetWeapon(weapon:Weapon) {
 			weaponSlot.SetWeapon(weapon);
+			AddWeaponToHand();
+		}
+		
+		private function AddWeaponToHand() {
+			if(currentLabel == "Idle") {
+				if(seanBody.body.weaponHolder.numChildren < 2) {
+					seanBody.body.weaponHolder.addChild(weaponSlot);
+				}
+			}
 		}
 	}
 }

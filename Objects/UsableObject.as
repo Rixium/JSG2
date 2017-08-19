@@ -39,22 +39,18 @@ package Objects
 		}
 		
 		public function Update(e:Event):void {
-			if(!showing && !GameManager.sean.phone.ringing) {
-				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
+			if(!GameManager.sean.phone.ringing) {
+				if (GameManager.sean.eBounds.hitTestObject(useBounds) && !showing) {
 					//textShow = new TextDisplay(useText, x + width / 2, y - 50);
 					showing = true;
 					var character:String = Keys.GetDictionary()[Keys.USE];
 					GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
-				}
-			} else {
-				if (!GameManager.sean.eBounds.hitTestObject(useBounds) && !GameManager.sean.phone.ringing) {
+				} else if (!GameManager.sean.eBounds.hitTestObject(useBounds) && showing) {
 					//textShow.Destroy();
 					showing = false;
 					GameManager.ui.SetDescriptor("", true);
 				}
 			}
-			
-			
 		}
 		
 		public function RemoveListeners(e:Event):void {

@@ -10,7 +10,9 @@
 	import flash.ui.Mouse;
 	import flash.system.System;
 	import flash.media.SoundChannel;
-	 import flash.media.SoundTransform;
+	import flash.media.SoundTransform;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	
 	public class Menu extends Screen {
 		
@@ -41,6 +43,8 @@
 		private function MenuReady(e:Event):void {
 			mainMenu.getChildByName("playButton").addEventListener(MouseEvent.CLICK, StartGame);
 			mainMenu.getChildByName("optionsButton").addEventListener(MouseEvent.CLICK, ShowOptions);
+			mainMenu.getChildByName("youtubeButton").addEventListener(MouseEvent.CLICK, OpenYoutube);
+			mainMenu.getChildByName("twitterButton").addEventListener(MouseEvent.CLICK, OpenTwitter);
 		}
 		
 		private function StartGame(e:MouseEvent):void {
@@ -49,6 +53,14 @@
 			RemoveFromStage(mainMenu);
 			main.SetScreen(new GameScreen());
 			main = null;
+		}
+		
+		private function OpenYoutube(e:MouseEvent):void {
+			navigateToURL(new URLRequest("https://www.youtube.com/channel/UCuv_9KJvHYUD57grC9EPbhw"), "_blank");
+		}
+		
+		private function OpenTwitter(e:MouseEvent):void {
+			navigateToURL(new URLRequest("https://twitter.com/Rixium"), "_blank");
 		}
 		
 		private function ShowOptions(e:MouseEvent):void {

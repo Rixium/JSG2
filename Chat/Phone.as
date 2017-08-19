@@ -22,6 +22,7 @@ package Chat
 		public var ringing:Boolean;
 		var trans:SoundTransform;
 		var channel:SoundChannel;
+		public var inCall:Boolean;
 		
 		public function Phone() 
 		{
@@ -44,6 +45,7 @@ package Chat
 				ringSound = null;
 			} else {
 				if (conversation == null && ringing) {
+					inCall = false;
 					ringing = false;
 				}
 			}
@@ -51,6 +53,7 @@ package Chat
 		
 		public function StartPhoneByKeyboard(e:KeyboardEvent) {
 			if (e.keyCode == Keys.USE) {
+				inCall = true;
 				GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, StartPhoneByKeyboard);
 				removeEventListener(MouseEvent.CLICK, StartPhone);
 				GameManager.ui.SetDescriptor("", true);
@@ -69,6 +72,7 @@ package Chat
 		
 		public function StartPhone(e:MouseEvent) {
 			if (!chatting) {
+				inCall = true;
 				GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, StartPhoneByKeyboard);
 				GameManager.ui.SetDescriptor("", true);
 				removeEventListener(MouseEvent.CLICK, StartPhone);

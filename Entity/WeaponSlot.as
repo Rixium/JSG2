@@ -25,6 +25,10 @@ package Entity
 			this.weapon = weapon;
 			addChild(weapon);
 		}
+		
+		public function GetWeapon():Weapon {
+			return weapon;
+		}
 	}
 
 }

@@ -13,6 +13,12 @@ package Rooms
 	
 	public class LivingRoom extends Room
 	{
+		
+		var door:Door;
+		var door2:Door;
+		var door3:Door;
+		var sofa:Sofa;
+		var coffeeTable:CoffeeTable;
 
 		public function LivingRoom(lastRoom:int) 
 		{
@@ -24,15 +30,29 @@ package Rooms
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 			
-			var door:Door;
-			var door2:Door;
+			if (firstVisit) {
+				firstVisit = false;
+				
+				sofa = new Sofa(210, 205, 408, 168);
+				sofa.displayName = "Sofa";
+				sofa.description = "Perfect for TV n' Chill.";
+				objects.push(sofa);
+				sofa.gotoAndStop(1);
+				
+				coffeeTable = new CoffeeTable(223, 392, 364, 139);
+				coffeeTable.displayName = "Coffee Table";
+				coffeeTable.description = "Made for feet.";
+				objects.push(coffeeTable);
+			}
+			
+			sofa.Initialize();
+			coffeeTable.Initialize();
 			
 			if(door == null) {
-				door = new Door(120, 61, 125, 312, false, RoomNames.KITCHEN, RoomNames.LIVINGROOM, DoorTypes.CLEAN);
+				door = new Door(35, 61, 125, 312, false, RoomNames.KITCHEN, RoomNames.LIVINGROOM, DoorTypes.CLEAN);
 				door.displayName = "Door";
 				door.description = "Goes through to the Kitchen.";
 				door.interactable = true;
-				objects.push(door);
 				doors.push(door);
 			}
 			
@@ -52,8 +72,22 @@ package Rooms
 			door2.Initialize();
 			door2.UseInitialize();
 			
+			if(door3 == null) {
+				door3 = new Door(1120, door2.y + door2.height - 263, 125, 312, false, RoomNames.BASEMENT, RoomNames.LIVINGROOM, DoorTypes.CLEAN);
+				door3.displayName = "Door";
+				door3.description = "A door to the basement.";
+				door3.interactable = true;
+				doors.push(door3);
+			}
+			
+			door3.Initialize();
+			door3.UseInitialize();
+			
 			bLayer.addChild(door);
 			bLayer.addChild(door2);
+			bLayer.addChild(door3);
+			bLayer.addChild(sofa);
+			bLayer.addChild(coffeeTable);
 			
 			if (lastRoom != RoomNames.NONE) {
 				for (var i:int = 0; i < doors.length; i++) {
@@ -62,7 +96,7 @@ package Rooms
 						if (d.doorType != DoorTypes.SIDE) {
 							if (d.doorType == DoorTypes.STAIRSUP) {
 								GameManager.sean.scaleX = -2;
-								GameManager.sean.x = d.x - GameManager.sean.width / 2;
+								GameManager.sean.x = d.x - GameManager.sean.width / 2 - 20;
 								GameManager.sean.y = d.y + d.height - GameManager.sean.height / 2;
 							} else {
 								GameManager.sean.x = d.x + d.width / 2;

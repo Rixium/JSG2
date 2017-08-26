@@ -18,7 +18,7 @@ package Objects
 		var currentRoom:int
 		var locked:Boolean;
 		public var doorType:int;
-		
+
 		public function Door(x:int, y:int, w:int, h:int, locked:Boolean, roomLink:int, currentRoom:int, doorType:int)
 		{
 			this.gotoAndStop(doorType);

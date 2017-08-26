@@ -2,21 +2,18 @@ package Objects
 {
 
 	import flash.events.MouseEvent;
+	import flash.events.Event;
 	import Items.*;
 	import Constants.GameManager;
 	
 	public class Chest extends UsableObject
 	{
 		
-		private var item:Item;
+		protected var item:Item;
 		
-		public function Chest(x:int, y:int, w:int, h:int)
+		public function Chest()
 		{
 			super();
-			this.y = y;
-			this.x = x;
-			this.width = w;
-			this.height = h;
 			this.interactable = true;
 			this.collidable = true;
 			this.useText = "Open";
@@ -39,6 +36,7 @@ package Objects
 				if(GameManager.sean.GetInventory().HasFreeSpace()) {
 					if (GameManager.sean.GetInventory().AddItem(item, false)) {
 						item = null;
+						dispatchEvent(new Event("itemTaken"));
 					} else {
 						GameManager.ui.SetDescriptor("You have no space!", false);
 					}

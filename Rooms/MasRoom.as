@@ -29,7 +29,7 @@ package Rooms
 			if(door == null) {
 				door = new Door(1259, 350, 64, 312, false, RoomNames.HALLWAY, RoomNames.MASROOM, DoorTypes.SIDE);
 				door.displayName = "Door";
-				door.description = "Covered in gross green slime.." + door.description;
+				door.description = "Covered in gross green slime..";
 				door.interactable = true;
 				doors.push(door);
 			}

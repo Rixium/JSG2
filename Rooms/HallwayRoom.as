@@ -7,6 +7,7 @@ package Rooms
 	
 	import Objects.*;
 	import Constants.RoomNames;
+	import flash.accessibility.Accessibility;
 	import flash.globalization.Collator;
 	
 	import Constants.GameManager;
@@ -21,6 +22,7 @@ package Rooms
 		private var masDoor:Door;
 		private var atticDoor:Door;
 		private var hallArt:Art;
+		private var hallPlant:HallPlant;
 		
 		public function HallwayRoom(lastRoom:int) 
 		{
@@ -35,8 +37,15 @@ package Rooms
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 			
 			if (firstVisit) {
-				GameManager.sean.phone.InitiateConversation(Conversations.conversation2);
+				//GameManager.sean.phone.InitiateConversation(Conversations.conversation2);
 				firstVisit = false;
+				
+				hallPlant = new HallPlant(250, 116, 184, 306);
+				hallPlant.displayName = "Yucca";
+				hallPlant.description = "A beautiful tree.";
+				hallPlant.scaleX *= -1;
+				hallPlant.x = hallPlant.width + 10;
+				objects.push(hallPlant);
 			}
 			
 			if(door == null) {
@@ -82,6 +91,7 @@ package Rooms
 			masDoor.UseInitialize();
 			atticDoor.Initialize();
 			atticDoor.UseInitialize();
+			hallPlant.Initialize();
 			staircase.Initialize();
 			staircase.UseInitialize();
 			
@@ -91,6 +101,9 @@ package Rooms
 			bLayer.addChild(door);
 			bLayer.addChild(masDoor);
 			bLayer.addChild(hallArt);
+			bLayer.addChild(hallPlant);
+
+			
 			fLayer.addChild(staircase);
 
 			if (lastRoom != RoomNames.NONE) {

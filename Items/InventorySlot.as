@@ -46,14 +46,12 @@ package Items
 		private function MouseOver(e:MouseEvent):void {
 			if(GetItem() != null) {
 				GameManager.mouseInfo.SetText(GetItem().displayName);
+				GameManager.ui.SetDescriptor(GetItem().description, false);
 			}
 		}
 		
 		private function MouseClick(e:MouseEvent):void {
 				Select();
-				if (GetItem() != null) {
-					GameManager.ui.SetDescriptor(GetItem().description, false);
-				}
 		}
 		
 		public function Select():void {

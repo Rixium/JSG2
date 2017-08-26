@@ -22,6 +22,7 @@ package Entity
 	import flash.text.TextField;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import Sounds.*;
 	
 	import Constants.*;
 	
@@ -44,8 +45,6 @@ package Entity
 
 		var inventory:Inventory;
 
-		var weaponSlot:WeaponSlot;
-		
 		var currentItem:Item;
 		
 		public var phone:Phone;
@@ -80,31 +79,34 @@ package Entity
 			GameManager.ui.SetHealth(stats.health);
 			GameManager.ui.SetInventory(inventory);
 			
+			this.hurtSounds = new Array(new HurtOne());
 			
+			super.Initialize();
 		}
 		
-		public function Initialize():void {
+		public override function Initialize() {
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_UP, KeyUp);
 			GameManager.main.addEventListener(MouseEvent.CLICK, Attack);
 			gotoAndStop("Idle");
-			weaponSlot = new WeaponSlot();
-		}
-
-		function randomRange(minNum:Number, maxNum:Number):Number 
-		{
-			return (Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum);
+			weaponSlot = new WeaponSlot(this);
 		}
 		
 		private function Attack(e:MouseEvent) {
 			if(stats.stamina >= AbilityCosts.ATTACK) {
 				if (!attacking && weaponSlot.GetWeapon() != null && !roll && currentLabel == "Idle" && !phone.inCall) {
 					attacking = true;
+					seanBody.addEventListener("CheckHit", CheckHit);
 					seanBody.body.gotoAndPlay("Attack1");
 					seanBody.addEventListener("AttackFinished", EndAttack);
 					stats.stamina -= AbilityCosts.ATTACK;
 				}
 			}
+		}
+		
+		private function CheckHit(e:Event) {
+			GameManager.gameScreen.GetRoom().AttackEntities(this, weaponSlot.GetWeapon());
+			seanBody.removeEventListener("CheckHit", CheckHit);
 		}
 		
 		private function EndAttack(e:Event) {
@@ -118,7 +120,7 @@ package Entity
 				}
 		}
 		
-		public function Update():void {
+		public override function Update():void {
 			phone.Check();
 			
 			if(stats.stamina < stats.maxStamina) {
@@ -127,6 +129,10 @@ package Entity
 				} else {
 					stats.stamina++;
 				}
+			}
+			
+			if (stats.health <= 0) {
+				Die();
 			}
 			
 			var newX:int = x;
@@ -177,43 +183,56 @@ package Entity
 				StartIdle();
 			}
 			
-			if (newX != x || newY != y) {
-				var lastX:int = x;
-				var lastY:int = y;
-				
-				x = newX;
-				y = newY;
-				
-				if(gameScreen.GetRoom().CheckAble(this)) {
-					if(canSprint) {
-						stats.stamina -= AbilityCosts.RUN;
-						sprintResetTimer = sprintResetMaxTime;
-						if(stats.stamina < 0) {
-							stats.stamina = 0;
+			if(!knockedBack) {
+				if (newX != x || newY != y) {
+					var lastX:int = x;
+					var lastY:int = y;
+					
+					x = newX;
+					y = newY;
+					
+					if(gameScreen.GetRoom().CheckAble(this)) {
+						if(canSprint) {
+							stats.stamina -= AbilityCosts.RUN;
+							sprintResetTimer = sprintResetMaxTime;
+							if(stats.stamina < 0) {
+								stats.stamina = 0;
+							}
 						}
-					}
 
-					if (!roll && !attacking) {
-						StartWalk();
-					}
-				} else {
-					x = lastX;
-					y = lastY;
-					if(!roll && !attacking) {
-						StartIdle();
+						if (!roll) {
+							StartWalk();
+						}
+					} else {
+						x = lastX;
+						y = lastY;
+						if(!roll) {
+							StartIdle();
+						}
 					}
 				}
 			}
+				
+
 			
 			newX = 0;
 			newY = 0;
 			
 			speed = 0;
 			canSprint = false;
-			
+				
 			if(GameManager.ui.GetStamina() != stats.stamina) {
 				GameManager.ui.SetStamina(stats.stamina);
 			}
+			if(GameManager.ui.GetHealth() != stats.health) {
+				GameManager.ui.SetHealth(stats.health);
+			}
+		}
+		
+		private function Die() {
+			GameManager.gameScreen.SetRoom(RoomNames.lastRoom, GameManager.gameScreen.GetRoom().lastRoom);
+			stats.health = stats.maxHealth;
+			stats.stamina = stats.maxStamina;
 		}
 		
 		private function StartWalk() {
@@ -265,6 +284,7 @@ package Entity
 						if (attacking) {
 							EndAttack(null);
 						}
+						immune = true;
 						roll = true;
 						gotoAndStop("Roll");
 						addEventListener("rollFinished", RollFinished);
@@ -283,6 +303,7 @@ package Entity
 		
 		private function RollFinished(e:Event) {
 			roll = false;
+			immune = false;
 			if(!moveLeft && !moveRight && !moveUp && !moveDown) {
 				StartIdle();
 			} else {
@@ -327,10 +348,6 @@ package Entity
 			return inventory;
 		}
 		
-		public function GetStats():Stats {
-			return stats;
-		}
-		
 		public function SetWeapon(weapon:Weapon) {
 			weaponSlot.SetWeapon(weapon);
 			AddWeaponToHand();
@@ -342,6 +359,10 @@ package Entity
 					seanBody.body.weaponHolder.addChild(weaponSlot);
 				}
 			}
+		}
+		
+		public function RemoveWeapon() {
+			weaponSlot.RemoveWeapon();
 		}
 	}
 }

@@ -3,6 +3,7 @@ package Chat
 	
 	import Constants.GameManager;
 	import Sounds.AnswerPhone;
+	import Sounds.HangupSound;
 	import Sounds.PhoneVibrateSound;
 	import Sounds.RingtoneSound;
 	import flash.events.Event;
@@ -47,6 +48,9 @@ package Chat
 				if (conversation == null && ringing) {
 					inCall = false;
 					ringing = false;
+					var hangUp:HangupSound = new HangupSound();;
+					channel = hangUp.play(0, 0, trans);
+					hangUp = null;
 				}
 			}
 		}

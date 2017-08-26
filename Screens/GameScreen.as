@@ -7,7 +7,12 @@ package Screens {
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.geom.Rectangle;
+	import flash.media.Sound;
+	import flash.media.SoundChannel;
+	import flash.media.SoundTransform;
 	import flash.system.System;
+	import flash.utils.Timer;
+	import flash.events.TimerEvent;
 	
 	import Constants.GameManager;
 	
@@ -27,12 +32,19 @@ package Screens {
 		
 		private var roomLayer:MovieClip;
 		private var uiLayer:MovieClip;
+		private var rectangle:Rectangle;
+		private var followSean:Boolean = false;
+		var gameTimer:Timer;
+		
+		private var channel:SoundChannel;
+		private var trans:SoundTransform;
 		
 		
 		public function GameScreen() {
 			GameManager.main.gotoAndStop(1, "seanroom");
 			
 			GameManager.gameScreen = this;
+			trans = new SoundTransform(GameManager.musicLevel, 0); 
 			
 			uiLayer = GameManager.main.getChildByName("uiLayer") as MovieClip;
 			uiLayer.mouseEnabled = false;
@@ -47,6 +59,7 @@ package Screens {
 
 			SetRoom(RoomNames.NONE, RoomNames.SEANSROOM);
 			
+			rectangle = roomLayer.scrollRect;
 			
 			sean.Initialize();
 			GameManager.main.addEventListener(Event.ENTER_FRAME, Update);
@@ -68,20 +81,33 @@ package Screens {
 		public function Update(e:Event):void {
 			mouseInfo.x = GameManager.main.stage.mouseX;
 			mouseInfo.y = GameManager.main.stage.mouseY;
-			sean.Update();
+			//sean.Update();
 			
+			if (room != null) {
+				if(room.canUpdate) {
+					room.Update();
+				}
+			}
 			// Maybe keep?
-			//roomLayer.scrollRect = new Rectangle(sean.x - GameManager.main.stage.stageWidth / 2, sean.y - GameManager.main.stage.stageHeight / 2, GameManager.main.stage.stageWidth, GameManager.main.stage.stageHeight);
+			if(followSean) {
+				roomLayer.scrollRect = new Rectangle(sean.x - GameManager.main.stage.stageWidth / 2, sean.y - GameManager.main.stage.stageHeight / 2, GameManager.main.stage.stageWidth, GameManager.main.stage.stageHeight);
+			} else {
+				roomLayer.scrollRect = rectangle;
+			}
 		}
 		
+		public function Follow(follow:Boolean):void {
+			followSean = follow;
+		}
+
 		public function GetRoom():Room {
 			return this.room;
 		}
 		
 		public function SetRoom(currentRoom:int, newRoom:int):void {
 			if (room != null) {
-				room.Clean();
 				roomLayer.removeChild(room);
+				room.Clean();
 			}
 
 			var r:Room = RoomNames.GetRoom(currentRoom, newRoom);
@@ -101,5 +127,16 @@ package Screens {
 			room.AddObjects();
 		}
 		
+		public function PlayTrack(song:Sound, loop:Boolean) {
+			if(loop) {
+				channel = song.play(0, 9999, trans);
+			} else {
+				channel = song.play(0, 0, trans);
+			}
+		}
+		
+		public function StopTrack() {
+			channel.stop();
+		}
 	}
 }

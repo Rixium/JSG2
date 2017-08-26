@@ -9,6 +9,7 @@ package Entity
 		public var maxHealth:int;
 		public var stamina:int;
 		public var maxStamina:int;
+		public var vision:int;
 		
 		public function Stats(speed:int, health:int, stamina:int)
 		{
@@ -18,6 +19,7 @@ package Entity
 				this.maxHealth = health;
 				this.stamina = stamina;
 				this.maxStamina = stamina;
+				this.vision = 400;
 		}
 	}
 }

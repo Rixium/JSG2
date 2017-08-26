@@ -28,7 +28,7 @@ package Items
 			this.x = GameManager.main.stage.stageWidth / 2;
 			this.y = GameManager.main.stage.stageHeight / 2;
 			itemLayer.addChild(item);
-			GameManager.main.addChild(this);
+			GameManager.ui.addChild(this);
 			addEventListener("Finished", RemoveFromStage);
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			
@@ -58,7 +58,7 @@ package Items
 		public function RemoveFromStage(e:Event) {
 			GameManager.sean.GetInventory().AddItem(item, true);
 			item = null;
-			GameManager.main.removeChild(this);
+			GameManager.ui.removeChild(this);
 			removeEventListener("Finished", RemoveFromStage);
 			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 		}

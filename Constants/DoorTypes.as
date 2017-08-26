@@ -16,6 +16,8 @@ package Constants
 		public static var STAIRSHALL = 7;
 		public static var STAIRDOOR = 8;
 		public static var STAIRSUP = 9;
+		public static var SHEDDOOR = 10;
+		public static var SPECIALDOOR = 11;
 		
 	}
 

@@ -1,5 +1,6 @@
 package Chat 
 {
+	import Constants.Conversations;
 	import flash.display.MovieClip;
 	import Constants.GameManager;
 	import Constants.Keys;
@@ -28,7 +29,7 @@ package Chat
 			this.conversation = c;
 		}
 		
-		protected function StartChat() {
+		public function StartChat() {
 			GameManager.sean.reading = true;
 			var chatLine:ChatLine = conversation.GetChat()[conversation.currentLine] as ChatLine;
 			chatBox = new ChatBox();
@@ -115,6 +116,10 @@ package Chat
 			} else {
 				chatBox.Finish();
 			}
+		}
+		
+		public function GetChat():Conversation {
+			return this.conversation;
 		}
 		
 	}

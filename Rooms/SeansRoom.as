@@ -8,13 +8,14 @@ package Rooms
 	import Objects.*;
 	import Constants.*;
 	import Items.*;
+	import Sounds.MainSound;
 	import Weapons.Weapon;
 	
 	public class SeansRoom extends Room
 	{
 		
 		var studioLight:StudioLight;
-		var cabinet:Chest;
+		var cabinet:BedroomDrawers;
 		var desk:Table;
 		var shelf:Shelf;
 		var door:Door;
@@ -41,8 +42,9 @@ package Rooms
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 			
 			if (firstVisit) {
-				GameManager.sean.phone.InitiateConversation(Conversations.conversation1);
+				//GameManager.sean.phone.InitiateConversation(Conversations.conversation1);
 				firstVisit = false;
+				GameManager.gameScreen.PlayTrack(new MainSound(), true);
 			}
 			
 			if(studioLight == null) {
@@ -54,7 +56,7 @@ package Rooms
 			}
 			
 			if(cabinet == null) {
-				cabinet = new Chest(20, 226, 120, 190);
+				cabinet = new BedroomDrawers(20, 226, 120, 190);
 				cabinet.displayName = "Cabinet";
 				cabinet.description = "A place to store things.";
 				cabinet.interactable = true;

@@ -9,6 +9,8 @@ package Constants
 		
 		public static var STICK:int = 1;
 		public static var SEPTICSWORD:int = 2;
+		public static var TORCH:int = 3;
+		public static var BUTCHERSKNIFE:int = 4;
 		
 	}
 

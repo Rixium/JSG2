@@ -15,10 +15,11 @@ package Objects
 	{
 		
 		private var useBounds:MovieClip;
-		protected var useText:String;
+		public var useText:String;
 		private var textShow:TextDisplay;
 		private var showing:Boolean;
-		private var canUse:Boolean = true;
+		protected var canUse:Boolean = true;
+		public var readyToUse:Boolean = true;
 		
 		public function UsableObject() 
 		{
@@ -39,16 +40,18 @@ package Objects
 		}
 		
 		public function Update(e:Event):void {
-			if(!GameManager.sean.phone.ringing) {
-				if (GameManager.sean.eBounds.hitTestObject(useBounds) && !showing) {
-					//textShow = new TextDisplay(useText, x + width / 2, y - 50);
-					showing = true;
-					var character:String = Keys.GetDictionary()[Keys.USE];
-					GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
-				} else if (!GameManager.sean.eBounds.hitTestObject(useBounds) && showing) {
-					//textShow.Destroy();
-					showing = false;
-					GameManager.ui.SetDescriptor("", true);
+			if(readyToUse) {
+				if(!GameManager.sean.phone.ringing) {
+					if (GameManager.sean.eBounds.hitTestObject(useBounds) && !showing) {
+						//textShow = new TextDisplay(useText, x + width / 2, y - 50);
+						showing = true;
+						var character:String = Keys.GetDictionary()[Keys.USE];
+						GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
+					} else if (!GameManager.sean.eBounds.hitTestObject(useBounds) && showing) {
+						//textShow.Destroy();
+						showing = false;
+						GameManager.ui.SetDescriptor("", true);
+					}
 				}
 			}
 		}

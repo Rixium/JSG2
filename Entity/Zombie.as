@@ -100,7 +100,7 @@ package Entity
 					x +=  xChange;
 					y +=  yChange;
 					
-					if(!GameManager.gameScreen.GetRoom().CheckAble(this)) {
+					if(!GameManager.gameScreen.GetRoom().CheckAble(this, false)) {
 						x = oldX;
 						y = oldY;
 					}

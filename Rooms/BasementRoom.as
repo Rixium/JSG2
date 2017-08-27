@@ -25,10 +25,6 @@ package Rooms
 		var brazier2:Brazier;
 		var specialDoor:SpecialDoor;
 		var opening:Boolean = false;
-		var startX:int;
-		var startY:int;
-		var goingLeft:Boolean = true;
-		var goingRight:Boolean = false;
 		
 		public function BasementRoom(lastRoom:int) 
 		{
@@ -148,23 +144,7 @@ package Rooms
 				removeEventListener(Event.ENTER_FRAME, CheckDoors);
 			}
 		}
-		
-		private function Shake() {
-			if (this.x > startX - 3 && goingLeft) {
-				x -= 2;
-			} else if (this.x < startX + 3 && goingRight) {
-				x += 2;
-			}
-			
-			if (this.x <= startX - 3) {
-				goingLeft = false;
-				goingRight = true;
-			} else if (this.x >= startX + 3) {
-				goingLeft = true;
-				goingRight = false;
-			}
-		}
-		
+
 	}
 
 }

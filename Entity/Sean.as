@@ -80,7 +80,6 @@ package Entity
 			GameManager.ui.SetInventory(inventory);
 			
 			this.hurtSounds = new Array(new HurtOne());
-			
 			super.Initialize();
 		}
 		
@@ -90,6 +89,12 @@ package Entity
 			GameManager.main.addEventListener(MouseEvent.CLICK, Attack);
 			gotoAndStop("Idle");
 			weaponSlot = new WeaponSlot(this);
+			
+			var weapon:WeaponItem = new WeaponItem(ItemImages.SEPTICSWORD, WeaponTypes.SEPTICSWORD, 100);
+				weapon.displayName = "Septic Sword";
+				weapon.description = "The legendary septic sword.";
+				
+				inventory.AddItem(weapon, true);
 		}
 		
 		private function Attack(e:MouseEvent) {
@@ -191,7 +196,7 @@ package Entity
 					x = newX;
 					y = newY;
 					
-					if(gameScreen.GetRoom().CheckAble(this)) {
+					if(gameScreen.GetRoom().CheckAble(this, false)) {
 						if(canSprint) {
 							stats.stamina -= AbilityCosts.RUN;
 							sprintResetTimer = sprintResetMaxTime;
@@ -286,6 +291,7 @@ package Entity
 						}
 						immune = true;
 						roll = true;
+						seanBody.legs.gotoAndStop("Idle");
 						gotoAndStop("Roll");
 						addEventListener("rollFinished", RollFinished);
 						stats.stamina -= AbilityCosts.ROLL;

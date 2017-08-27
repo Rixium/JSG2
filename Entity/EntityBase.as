@@ -132,7 +132,7 @@ package Entity
 			
 			x +=  -(Math.cos(knockbackDir) * knockbackPower + knockbackPower / 2);
 			y +=  -(Math.sin(knockbackDir) * knockbackPower + knockbackPower / 2);
-			if (!GameManager.gameScreen.GetRoom().CheckAble(this)) {
+			if (!GameManager.gameScreen.GetRoom().CheckAble(this, false)) {
 				x = oldX;
 				y = oldY;
 			}

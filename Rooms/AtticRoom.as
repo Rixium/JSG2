@@ -8,6 +8,8 @@ package Rooms
 	import Entity.AbilityCosts;
 	import Entity.EnemyBase;
 	import Entity.Ma;
+	import Items.DoorKey;
+	import Items.Item;
 	import flash.display.MovieClip;
 	import Constants.GameManager;
 	import Entity.EntityBase;
@@ -23,14 +25,16 @@ package Rooms
 	public class AtticRoom extends Room
 	{
 
-		var goingLeft:Boolean = true;
-		var goingRight:Boolean = false;
+		
 		var chat:Chatter;
 		
 		var startedMusic:Boolean = false;
-		var startX:Number;
-		var startY:Number;
+		
 		var maRef:Ma;
+		var ended:Boolean = false;
+		var finished:Boolean = false;
+		var shownAll:Boolean = false;
+		var complete:Boolean = false;
 		
 		public function AtticRoom(lastRoom:int) 
 		{
@@ -118,24 +122,47 @@ package Rooms
 						maRef.Initialize();
 						maRef.body.headHolder.head.gotoAndStop("angry");
 					}
+					if (ended && !finished) {
+						StopShake();
+						finished = true;
+						maRef.body.gotoAndStop("idle");
+						maRef.legs.gotoAndStop("idle");
+						maRef.gotoAndPlay("dying");
+						maRef.body.headHolder.head.gotoAndStop("happy");
+					} else if (ended && finished && !shownAll) {
+						if (maRef.currentLabel == "dead") {
+							maRef.parent.removeChild(maRef);
+							chat.InitiateConversation(Conversations.maDeadConvo);
+							chat.StartChat();
+							shownAll = true;
+						}
+					} else if (shownAll && !complete) {
+						var maKey:DoorKey = new DoorKey(RoomNames.MASROOM, ItemImages.MASKEY);
+							maKey.displayName = "Ma's Key";
+							maKey.description = "A key to Ma's room.";
+							GameManager.sean.GetInventory().AddItem(maKey, false);
+							maKey = null;
+							complete = true;
+					}
+				}
+				
+				if (shaking) {
+					Shake();
+				}
+				
+				if(maRef != null) {
+					if (maRef.dead && !ended) {
+						StartEnd();
+						ended = true;
+					}
 				}
 			}
 		}
 		
-		private function Shake() {
-			if (this.x > startX - 3 && goingLeft) {
-				x -= 2;
-			} else if (this.x < startX + 3 && goingRight) {
-				x += 2;
-			}
-			
-			if (this.x <= startX - 3) {
-				goingLeft = false;
-				goingRight = true;
-			} else if (this.x >= startX + 3) {
-				goingLeft = true;
-				goingRight = false;
-			}
+		private function StartEnd() {
+			GameManager.gameScreen.StopTrack();
+			chat.InitiateConversation(Conversations.maDeathConvo);
+			chat.StartChat();
 		}
 		
 	}

@@ -1,5 +1,7 @@
 package Objects
 {
+	import Items.Item;
+	import Items.WeaponItem;
 	import Rooms.Room;
 	import Constants.RoomNames;
 	import Constants.GameManager;
@@ -18,6 +20,7 @@ package Objects
 		var currentRoom:int
 		var locked:Boolean;
 		public var doorType:int;
+		public var wItemToOpen:int;
 
 		public function Door(x:int, y:int, w:int, h:int, locked:Boolean, roomLink:int, currentRoom:int, doorType:int)
 		{
@@ -48,23 +51,38 @@ package Objects
 				channel = null;
 				GameManager.gameScreen.SetRoom(currentRoom, roomLink);
 			} else {
-				if(GameManager.sean.GetInventory().selectedItemSlot.GetItem() != null) {
+				if (GameManager.sean.GetInventory().selectedItemSlot.GetItem() != null) {
+					
+					var canOpen:Boolean = false;
+					
+					if (GameManager.sean.GetInventory().selectedItemSlot.GetItem().itemType == ItemTypes.WEAPON) {
+						var wItem:WeaponItem;
+						wItem = GameManager.sean.GetInventory().selectedItemSlot.GetItem() as WeaponItem;
+						if (wItem.weaponType == wItemToOpen) {
+							canOpen = true;
+						}
+					}
+					
 					if (GameManager.sean.GetInventory().selectedItemSlot.GetItem().itemType == ItemTypes.DOORKEY) {
 						var key:DoorKey = GameManager.sean.GetInventory().selectedItemSlot.GetItem() as DoorKey;
 						if (key.GetDoor() == roomLink) {
-							GameManager.ui.SetDescriptor("You unlocked the " + displayName + "..", false);
-							var unlockSound:DoorUnlockSound = new DoorUnlockSound();;
-							trans = new SoundTransform(GameManager.soundLevel, 0); 
-							channel = unlockSound.play(0, 1, trans);
-							this.locked = false;
-							unlockSound = null;
-							trans = null;
-							channel = null;
-							GameManager.sean.GetInventory().selectedItemSlot.RemoveItem();
+							canOpen = true;
 						}  else {
 							GameManager.ui.SetDescriptor("That doesn't work..", false);
 						}
+						GameManager.sean.GetInventory().selectedItemSlot.RemoveItem();
 						key = null;
+					}
+					
+					if (canOpen) {
+						GameManager.ui.SetDescriptor("You unlocked the " + displayName + "..", false);
+						var unlockSound:DoorUnlockSound = new DoorUnlockSound();;
+						trans = new SoundTransform(GameManager.soundLevel, 0); 
+						channel = unlockSound.play(0, 1, trans);
+						this.locked = false;
+						unlockSound = null;
+						trans = null;
+						channel = null;
 					} else {
 						var lockedDoorSound2:LockedDoorSound = new LockedDoorSound();;
 						trans = new SoundTransform(GameManager.soundLevel, 0); 

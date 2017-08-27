@@ -45,11 +45,26 @@ package Constants
 		new ChatLine(ChatHeads.SEAN, "Control what? Ma?"),
 		new ChatLine(ChatHeads.ANGRYMA, "You.. Must.. Die."));
 		
+		private static var maDeath:Array = new Array(
+		new ChatLine(ChatHeads.ANGRYMA, "I'm sorry.."),
+		new ChatLine(ChatHeads.ANGRYMA, "Go.. take this.."),
+		new ChatLine(ChatHeads.ANGRYMA, "I've hidden the gate key in my room."),
+		new ChatLine(ChatHeads.SEAN, "Ma?"),
+		new ChatLine(ChatHeads.ANGRYMA, "I love you.."));
+		
+		
+		private static var maDead:Array = new Array(
+		new ChatLine(ChatHeads.SEAN, "NOOOO!"),
+		new ChatLine(ChatHeads.SEAN, "MAAAAA!"));
+		
+		
 		public static var conversation1:Conversation = new Conversation(conversation1Chat);
 		public static var conversation2:Conversation = new Conversation(conversation2Chat);
 		public static var conversation3:Conversation = new Conversation(conversation3Chat);
 		public static var septicSwordConvo:Conversation = new Conversation(septicSwordChat);
 		public static var atticConvo:Conversation = new Conversation(atticChat);
+		public static var maDeathConvo:Conversation = new Conversation(maDeath);
+		public static var maDeadConvo:Conversation = new Conversation(maDead);
 		
 	}
 

@@ -28,6 +28,12 @@ package Rooms
 		protected var eLayer:MovieClip;
 		public var canUpdate:Boolean = true;
 		
+		protected var shaking:Boolean = false;
+		var startX:Number;
+		var startY:Number;
+		var goingLeft:Boolean = true;
+		var goingRight:Boolean = false;
+		
 		public function Room() 
 		{
 			canUpdate = true;
@@ -151,7 +157,7 @@ package Rooms
 			fLayer = null;
 		}
 		
-		public function CheckAble(e:EntityBase):Boolean {
+		public function CheckAble(e:EntityBase, ignoreEntities:Boolean):Boolean {
 			for(var i:int = 0; i < objects.length; i++) {
 				if(objects[i].eBounds != null) {
 					if(e.eBounds.hitTestObject(objects[i].eBounds)) {
@@ -166,17 +172,47 @@ package Rooms
 				}
 			}
 			
-			for (var z:int = 0; z < eLayer.numChildren; z++) {
-				var entity:EntityBase = eLayer.getChildAt(z) as EntityBase;
-				if(e != entity) {
-					if (e.eBounds.hitTestObject(entity.eBounds)) {
-						return false;
+			if(!ignoreEntities) {
+				for (var z:int = 0; z < eLayer.numChildren; z++) {
+					var entity:EntityBase = eLayer.getChildAt(z) as EntityBase;
+					if(e != entity) {
+						if (e.eBounds.hitTestObject(entity.eBounds)) {
+							return false;
+						}
 					}
+					entity = null;
 				}
-				entity = null;
+			}
+			return true;
+		}
+		
+		public function Shake() {
+			if (!shaking) {
+				goingLeft = true;
+				startX = this.x;
+				startY = this.y;
 			}
 			
-			return true;
+			shaking = true;
+			if (this.x > startX - 2 && goingLeft) {
+				x -= 2;
+			} else if (this.x < startX + 2 && goingRight) {
+				x += 2;
+			}
+			
+			if (this.x <= startX - 2) {
+				goingLeft = false;
+				goingRight = true;
+			} else if (this.x >= startX + 2) {
+				goingLeft = true;
+				goingRight = false;
+			}
+		}
+		
+		public function StopShake() {
+			shaking = false;
+			this.x = startX;
+			this.y = startY;
 		}
 		
 	}

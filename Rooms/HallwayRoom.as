@@ -13,6 +13,7 @@ package Rooms
 	import Constants.GameManager;
 	import Constants.DoorTypes;
 	import Constants.Conversations;
+	import Constants.WeaponTypes;
 	
 	public class HallwayRoom extends Room
 	{
@@ -65,9 +66,10 @@ package Rooms
 				
 			}
 			if(atticDoor == null) {
-				atticDoor = new Door(726, 28, 145, 386, true, RoomNames.ATTIC, RoomNames.HALLWAY, DoorTypes.HATCHBOTTOM);
+				atticDoor = new Door(726, 28, 145, 386, false, RoomNames.ATTIC, RoomNames.HALLWAY, DoorTypes.HATCHBOTTOM);
 				atticDoor.displayName = "Hatch";
 				atticDoor.description = "A hatch leading to the Attic..";
+				atticDoor.wItemToOpen = WeaponTypes.STICK;
 				doors.push(atticDoor);
 			}
 			if (hallArt == null) {

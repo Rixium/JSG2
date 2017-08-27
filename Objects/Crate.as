@@ -17,6 +17,7 @@ package Objects
 			this.height = h;
 			this.interactable = true;
 			this.collidable = true;
+			useText = "Search";
 		}
 
 	}

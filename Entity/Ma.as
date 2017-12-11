@@ -1,5 +1,7 @@
 package Entity 
 {
+	import Sounds.HeavyBang;
+	import UIObjects.BossHealthBar;
 	import flash.display.MovieClip;
 	import Constants.GameManager;
 	import UIObjects.HealthBar;
@@ -13,6 +15,7 @@ package Entity
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
 	import flash.utils.Timer;
+	import Objects.BrickFall;
 	
 	/**
 	 * ...
@@ -43,27 +46,61 @@ package Entity
 		var tempSpeed:int;
 		var dirToGo:Number;
 		
+		var bossHealthBar:BossHealthBar;
+		
+		var brickTimer:Timer = new Timer(50, 3);
+		
 		var voiceSounds:Array = new Array(new MaOne(), new MaTwo(), new MaThree(), new MaFour(), new MaFive(), new  MaSix());
 		
-		public function Ma() 
+		public function Ma(x:int, y:int, w:int, h:int) 
 		{
 			super();
 			headRef = (body.headHolder.head) as MovieClip;
 			bodyRef = body;
 			legsRef = legs;
+			
+			this.x = x;
+			this.y = y;
+			this.width = w;
+			this.height = h;
+			
 			startScaleX = scaleX;
 			startScaleY = scaleY;
 			
+			immuneTime = 10;
 			headRef.gotoAndStop("happy");
 			
 			stats = new Stats(5, 200, 100);
 			stats.vision = 1400;
+			
+			addEventListener(Event.REMOVED_FROM_STAGE, RemovedFromStage, false, 0, true);
 
 			displayName = "Ma";
 			description = "A strange aura surrounds her.";
-			startWidthHealthBar = healthbar.width;
-			canKnockback = false;
+			
+			canKnockback = true;
 			this.hurtSounds = new Array(new MaHurtOne(), new MaHurtTwo(), new MaHurtThree());
+		}
+		
+		private function RemovedFromStage(e:Event) {
+			removeEventListener(Event.REMOVED_FROM_STAGE, RemovedFromStage);
+			addEventListener(Event.ENTER_FRAME, CheckStage, false, 0, true);
+		}
+		
+		private function CheckStage(e:Event) {
+			if (!stage) {
+				GameManager.maIsDead = false;
+				bodyRef.gotoAndStop("idle");
+				legsRef.gotoAndStop("idle");
+				body.removeEventListener("CheckHit", CheckHit);
+				brickTimer.reset();
+				brickTimer.stop();
+				stats.health = stats.maxHealth;
+				if(bossHealthBar != null) {
+					GameManager.ui.removeChild(bossHealthBar);
+				}
+				removeEventListener(Event.ENTER_FRAME, CheckStage);
+			}
 		}
 		
 		public override function Initialize() {
@@ -71,6 +108,11 @@ package Entity
 			GameManager.gameScreen.GetRoom().AddEntity(this);
 		}
 		
+		override public function Hit(e:EntityBase, power:int, knockback:int, dir:Number) 
+		{
+			super.Hit(e, power, knockback, dir);
+			bossHealthBar.Set(stats.health, stats.maxHealth);
+		}
 		private function PlayVoice():void {
 			if (!talking && !attacking) {
 				talking = true;
@@ -95,9 +137,17 @@ package Entity
 			stats.speed *= 2;
 		}
 		
+		public function ReadyUp() {
+			bossHealthBar = new BossHealthBar(stats.maxHealth);
+			bossHealthBar.nameBar.text = "Ma";
+			GameManager.ui.addChild(bossHealthBar);
+			bossHealthBar.y = 0;
+		}
+		
 		override public function Update():void 
 		{
 			if (!dead) {
+				super.Update();
 				if (randomRange(0, 200) == 1) {
 					PlayVoice();
 				}
@@ -111,7 +161,7 @@ package Entity
 				}
 				
 				var dist:Number = Math.floor(getDistance(GameManager.sean, this));
-				healthbar.width = stats.health / stats.maxHealth * startWidthHealthBar;
+				
 				if (dist < stats.vision && !knockedBack && !attacking && !charging) {
 					if(!startedWalking) {
 						legsRef.gotoAndPlay("walk");
@@ -160,6 +210,7 @@ package Entity
 					x +=  xChange;
 					y +=  yChange;
 					
+					GameManager.gameScreen.GetRoom().AttackEntitiesNoWeapon(this, eBounds, 3, 50);
 					if(!GameManager.gameScreen.GetRoom().CheckAble(this, true)) {
 						x = oldX;
 						y = oldY;
@@ -183,6 +234,9 @@ package Entity
 				
 				if (stats.health <= 0) {
 					stats.health = 0;
+					GameManager.ui.removeChild(bossHealthBar);
+					bossHealthBar = null;
+					GameManager.ui.SetHealthBarPos(10);
 					Die();
 				}
 			}
@@ -220,15 +274,13 @@ package Entity
 			if (currentLabel != "dying") {
 				bodyRef.gotoAndStop("idle");
 				legsRef.gotoAndStop("idle");
-				//addEventListener("dead", Kill);
-				//gotoAndPlay("dying");
+				GameManager.maIsDead = true;
 				dead = true;
 			}
 		}
 		
 		private function Attack() {
 			if (!attacking && stats.stamina > AbilityCosts.ATTACK) {
-				
 				stats.stamina -= AbilityCosts.ATTACK;
 				attacking = true;
 				bodyRef.gotoAndPlay("attack1");	
@@ -238,16 +290,47 @@ package Entity
 			}
 		}
 		
+		public function Remove() {
+			parent.removeChild(this);
+		}
+		
 		private function CheckHit(e:Event) {
 				GameManager.gameScreen.GetRoom().AttackEntitiesNoWeapon(this, bodyRef.hitarea, 10, 40);
 				body.removeEventListener("CheckHit", CheckHit);
-				GameManager.gameScreen.GetRoom().Shake();
+				
+				var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
+				voiceChannel = new HeavyBang().play(0, 0, trans);
+				trans = null;
+				
+				if (stats.health <= stats.maxHealth / 2) {
+					GameManager.gameScreen.GetRoom().Shake();
+					StartBrickFall();
+				}
+		}
+		
+		private function StartBrickFall() {
+			brickTimer.reset();
+			brickTimer.addEventListener(TimerEvent.TIMER, SpawnBrick);
+			brickTimer.addEventListener(TimerEvent.TIMER_COMPLETE, StopSpawnBrick);
+			brickTimer.start();
+		}
+		
+		private function StopSpawnBrick(e:TimerEvent) {
+			GameManager.gameScreen.GetRoom().StopShake();
+		}
+		
+		
+		private function SpawnBrick(e:TimerEvent) {
+			var brickX:int = randomRange(0, GameManager.main.stage.stageWidth);
+			var brickY:int = randomRange(200, GameManager.main.stage.stageHeight);
+			
+			var brick:BrickFall = new BrickFall(brickX, brickY);
+			GameManager.gameScreen.GetRoom().AddBackItem(brick);
 		}
 		
 		private function AttackFinished(e:Event) {
 			bodyRef.removeEventListener("attackFinished", AttackFinished);
 			bodyRef.gotoAndStop("idle");
-			GameManager.gameScreen.GetRoom().StopShake();
 			
 			var shouldCharge:Boolean = (randomRange(0, 10) == 1);
 			if (shouldCharge) {

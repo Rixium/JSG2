@@ -21,11 +21,13 @@ package Rooms
 	import Chat.Chatter;
 	import Constants.*;
 	import Sounds.MaFight;
+	import Objects.Light;
+	
+	import Entity.Bullet;
+	import Entity.Explode;
 	
 	public class AtticRoom extends Room
 	{
-
-		
 		var chat:Chatter;
 		
 		var startedMusic:Boolean = false;
@@ -36,22 +38,50 @@ package Rooms
 		var shownAll:Boolean = false;
 		var complete:Boolean = false;
 		
+		var hatchDoor:Door;
+		var lightSize:int = 1400;
+		
 		public function AtticRoom(lastRoom:int) 
 		{
 			super();
+			StopShake();
 			this.lastRoom = lastRoom;
+			roomTrack = RoomTracks.NONE;
 		}
 		
 		public override function AddObjects():void {
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
 
-			if (firstVisit) {
+			entityLayer.addChild(crate1);
+			entityLayer.addChild(crate2);
+			entityLayer.addChild(crate3);
+			entityLayer.addChild(crate4);
+			entityLayer.addChild(crate5);
+			
+			if (firstVisit || !GameManager.maKilled) {
 				firstVisit = false;
-				GameManager.gameScreen.StopTrack();
+				hatchDoor = new Door(GameManager.main.stage.stageWidth / 2 - 64, GameManager.main.stage.stageHeight / 2 - 64, 128, 128, true, RoomNames.HALLWAY, RoomNames.ATTIC, DoorTypes.HATCHTOP);
+				hatchDoor.displayName = "Hatch";
+				hatchDoor.description = "A hatch down to the hall.";
+				hatchDoor.useText = "Descend";
+				doors.push(hatchDoor);
+				
+				
+			
 				chat = new Chatter();
-				chat.InitiateConversation(Conversations.atticConvo);
-				chat.StartChat();
+				
+				if(!GameManager.visitedMa) {
+					chat.InitiateConversation(Conversations.atticConvo);
+					chat.StartChat();
+					GameManager.visitedMa = true;
+				}
+				maRef = new Ma(282, 472, 212, 399);
+				fLayer.addChild(maRef);
+				
+				var light:Light = new Light(GameManager.main.stage.stageWidth / 2 - lightSize / 2, GameManager.main.stage.stageHeight / 2 - lightSize / 2, lightSize, lightSize);
+				lightMask.addChild(light);
+				light = null;
 			}
 
 			if (lastRoom != RoomNames.NONE && doors.length > 0) {
@@ -80,6 +110,10 @@ package Rooms
 				GameManager.sean.y = GameManager.main.stage.stageHeight / 2;
 			}
 			
+			startedMusic = false;
+			bLayer.addChild(hatchDoor);
+			hatchDoor.Initialize();
+			hatchDoor.UseInitialize();
 			
 			basementBorder.mouseEnabled = false;
 			bLayer = null;
@@ -87,7 +121,7 @@ package Rooms
 		}
 		
 		public override function Update():void {
-			if(canUpdate) {
+			if (canUpdate) {
 				if(eLayer.numChildren > 1) {
 					for (var i:int = 0; i < eLayer.numChildren; i++) {
 						if (i + 1 < eLayer.numChildren) {
@@ -114,16 +148,40 @@ package Rooms
 					}
 				}
 				
+				for (var y:int = 0; y < bullets.length; y++) {
+					var bullet:Bullet = bullets[y] as Bullet;
+					bullet.Update();
+					if (BulletAttack(bullet.GetOwner(), bullet, bullet.GetDamage(), bullet.GetKnockback())) {
+						bullet.SetDead();
+						var explode:Explode = new Explode(bullet.getBounds(stage).x, bullet.getBounds(stage).y);
+						var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
+						fLayer.addChild(explode);
+						fLayer = null;
+						explode = null;
+					}
+					if (bullet.GetDead()) {
+						bullets.removeAt(y);
+						bullet.Kill();
+						break;
+					}
+					
+					bullet = null;
+				}
+				
 				if (chat.GetChat() == null) {
-					if (!startedMusic) {
+					if (!startedMusic && !complete) {
 						startedMusic = true;
-						GameManager.gameScreen.PlayTrack(new MaFight(), true);
-						maRef = ma;
+						roomTrack = RoomTracks.MAFIGHT;
+						GameManager.gameScreen.musicManager.PlayTrack(roomTrack);
 						maRef.Initialize();
 						maRef.body.headHolder.head.gotoAndStop("angry");
+						maRef.ReadyUp();
+						GameManager.ui.SetHealthBarPos(20);
 					}
 					if (ended && !finished) {
+						GameManager.maKilled = true;
 						StopShake();
+						GameManager.sean.immune = true;
 						finished = true;
 						maRef.body.gotoAndStop("idle");
 						maRef.legs.gotoAndStop("idle");
@@ -131,7 +189,7 @@ package Rooms
 						maRef.body.headHolder.head.gotoAndStop("happy");
 					} else if (ended && finished && !shownAll) {
 						if (maRef.currentLabel == "dead") {
-							maRef.parent.removeChild(maRef);
+							maRef.Remove();
 							chat.InitiateConversation(Conversations.maDeadConvo);
 							chat.StartChat();
 							shownAll = true;
@@ -141,8 +199,11 @@ package Rooms
 							maKey.displayName = "Ma's Key";
 							maKey.description = "A key to Ma's room.";
 							GameManager.sean.GetInventory().AddItem(maKey, false);
+							GameManager.sean.immune = false;
 							maKey = null;
 							complete = true;
+							hatchDoor.Unlock();
+							GameManager.sean.immune = false;
 					}
 				}
 				
@@ -153,14 +214,19 @@ package Rooms
 				if(maRef != null) {
 					if (maRef.dead && !ended) {
 						StartEnd();
+						GameManager.sean.immune = true;
+						maRef.immune = true;
 						ended = true;
+						GameManager.gameScreen.musicManager.PlayTrack(RoomTracks.NONE);
+					}
+					if (maRef.dead && !complete) {
+						GameManager.sean.immune = true;
 					}
 				}
 			}
 		}
 		
 		private function StartEnd() {
-			GameManager.gameScreen.StopTrack();
 			chat.InitiateConversation(Conversations.maDeathConvo);
 			chat.StartChat();
 		}

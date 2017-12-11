@@ -2,6 +2,7 @@ package Entity
 {
 	
 	import Constants.GameManager;
+	import Constants.ZombieHeads;
 	import Sounds.HurtOne;
 	import UIObjects.HealthBar;
 	import flash.display.MovieClip;
@@ -9,6 +10,8 @@ package Entity
 	import flash.geom.Rectangle;
 	import Weapons.Weapon;
 	import Sounds.*;
+	import Constants.WeaponTypes;
+	import flash.media.SoundTransform;
 	
 	/**
 	 * ...
@@ -16,14 +19,19 @@ package Entity
 	 */
 	public class Zombie extends EnemyBase 
 	{
-	
 		var startScaleX:int;
 		var startScaleY:int;
 		var startedWalking = false;
 		var startWidthHealthBar:Number;
 		var attacking:Boolean = false;
+		var hasDestination:Boolean = false;
+		var destX:int;
+		var destY:int;
 		
-		public function Zombie(x:int, y:int, health:int, stamina:int, weapon:Weapon) 
+		var hasShot:Boolean = false;
+		var hasShotTimer:int = 0;
+		
+		public function Zombie(x:int, y:int, health:int, stamina:int, weapon:Weapon, headtype:int) 
 		{
 			super();
 			displayName = "Corrupt";
@@ -40,39 +48,91 @@ package Entity
 			weaponSlot.SetWeapon(weapon);
 			body.weaponHolder.addChild(weaponSlot);
 			
+			if (headtype == ZombieHeads.RANDOM) {
+				head.gotoAndStop(randomRange(1, ZombieHeads.COUNT));
+			} else {
+				head.gotoAndStop(headtype);
+			}
+			
+			if (headtype == ZombieHeads.BILLY) {
+				body.gotoAndStop("BillyIdle");
+			}
+			
+			immuneTime = 5;
 			this.hurtSounds = new Array(new HurtOne());
 		}
 		
 		private function Attack() {
-			if (!attacking && stats.stamina > AbilityCosts.ATTACK) {
+			if (!attacking && stats.stamina > AbilityCosts.ATTACK && hasShotTimer <= 0) {
 				stats.stamina -= AbilityCosts.ATTACK;
 				attacking = true;
-				body.gotoAndPlay("Attack");
-				body.addEventListener("CheckHit", CheckHit); 
+				
+				if (GameManager.sean.getBounds(GameManager.gameScreen.roomLayer).x < x) {
+						scaleX = -startScaleX;
+					} else {
+						scaleX = startScaleX;
+					}
+					
+				if(head.currentFrame != ZombieHeads.BILLY) {
+					body.gotoAndPlay("Attack");
+				}  else {
+					body.gotoAndPlay("BillyAttack");
+				}
+				
+				if (weaponSlot.GetWeapon().weaponType != WeaponTypes.BOW && weaponSlot.GetWeapon().weaponType != WeaponTypes.SHOTGUN ) {
+					body.addEventListener("CheckHit", CheckHit); 
+				} else {
+					
+					weaponSlot.GetWeapon().PlaySound();
+					weaponSlot.GetWeapon().Shoot(scaleX, this);
+					hasShotTimer = 50;
+				}
 				addEventListener("AttackFinished", AttackFinished);
 			}
 		}
 		
 		private function CheckHit(e:Event) {
-				GameManager.gameScreen.GetRoom().AttackEntities(this, weaponSlot.GetWeapon());
-				body.removeEventListener("CheckHit", CheckHit);
+			var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
+			channel = new SlashOne().play(0, 0, trans);
+			trans = null;
+			channel = null;
+			GameManager.gameScreen.GetRoom().AttackEntities(this, weaponSlot.GetWeapon());
+			body.removeEventListener("CheckHit", CheckHit);
 		}
 		
 		private function AttackFinished(e:Event) {
 			removeEventListener("AttackFinished", AttackFinished);
 			attacking = false;
-			body.gotoAndStop("Idle");
+			if(head.currentFrame != ZombieHeads.BILLY) {
+				body.gotoAndStop("Idle");
+			}  else {
+				body.gotoAndStop("BillyIdle");
+			}
 		}
 		
 		private function Die() {
 			if (currentLabel != "dying") {
+				var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
+				channel = new DieSound().play(0, 0, trans);
+				trans = null;
+				channel = null;
+				dispatchEvent(new Event("Killed"));
 				addEventListener("dead", Kill);
 				gotoAndPlay("dying");
 				dead = true;
+				
+				if (item != null) {
+					DropItem();
+				}
 			}
-		}
+		} 
 		
 		public override function Update():void {
+			super.Update();
+			if (hasShotTimer > 0) {
+				hasShotTimer--;
+			}
+			
 			if(!dead) {
 				if(stats.stamina < stats.maxStamina) {
 						stats.stamina++;
@@ -80,7 +140,9 @@ package Entity
 				
 				var dist:Number = Math.floor(getDistance(GameManager.sean, this));
 				healthbar.width = stats.health / stats.maxHealth * startWidthHealthBar;
-				if (dist < stats.vision && !knockedBack && dist > GameManager.sean.width) {
+				if ((dist < stats.vision && !knockedBack && (dist > GameManager.sean.width) && weaponSlot.GetWeapon().weaponType != WeaponTypes.BOW) || 
+				(weaponSlot.GetWeapon().weaponType == WeaponTypes.BOW && (GameManager.sean.getBounds(stage).y - GameManager.sean.height / 3 < getBounds(stage).y - 150 || GameManager.sean.getBounds(stage).y + GameManager.sean.height / 3 > getBounds(stage).y + height))) {
+					hasDestination = false;
 					if(!startedWalking) {
 						legs.legs.gotoAndPlay("Walk");
 						startedWalking = true;
@@ -108,10 +170,49 @@ package Entity
 					eRect = null;
 					entityRect = null;
 					
-				} else if(dist >= stats.vision){
-					startedWalking = false;
-					legs.legs.gotoAndStop("Idle");
-				} else if (dist <= GameManager.sean.width + 30 && !attacking) {
+				} else if (dist >= stats.vision){
+					if ((randomRange(0, 100) == 1) && !hasDestination) {
+						destX = x + randomRange(0, 200) - 100;
+						destY = y + randomRange(0, 200) - 100;
+						hasDestination = true;
+					} else if (hasDestination) {
+						
+						if(!startedWalking) {
+							legs.legs.gotoAndPlay("Walk");
+							startedWalking = true;
+						}
+						dir = Math.atan2(destY - y, destX - x);
+						oldX = x;
+						oldY = y;
+						xChange = Math.cos(dir) * stats.speed;
+						yChange = Math.sin(dir) * stats.speed;
+						if (xChange < 0) {
+							scaleX = -startScaleX;
+						} else {
+							scaleX = startScaleX;
+						}
+						x +=  xChange;
+						y +=  yChange;
+						
+						if(!GameManager.gameScreen.GetRoom().CheckAble(this, false)) {
+							x = oldX;
+							y = oldY;
+							hasDestination = false;
+						}
+						
+						var distX:Number = destX - x;
+						var distY:Number = destY - y;
+						var dist2:Number = Math.sqrt(distX * distX + distY * distY);
+						
+						if (Math.floor(dist2) <= 10) {
+							hasDestination = false;
+						}
+						
+					} else {
+						startedWalking = false;
+						legs.legs.gotoAndStop("Idle");
+					}
+				} else if ((dist <= GameManager.sean.width + 30 || weaponSlot.GetWeapon().weaponType == WeaponTypes.BOW || weaponSlot.GetWeapon().weaponType == WeaponTypes.SHOTGUN) && !attacking) {
 					startedWalking = false;
 					legs.legs.gotoAndStop("Idle");
 					Attack();

@@ -3,8 +3,8 @@ package Entity
 	public class Stats
 	{
 		
-		public var speed:int;
-		public var runSpeed:int;
+		public var speed:Number;
+		public var runSpeed:Number;
 		public var health:int;
 		public var maxHealth:int;
 		public var stamina:int;

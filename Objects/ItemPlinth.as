@@ -7,6 +7,7 @@ package Objects
 	
 	import Items.Item;
 	import Constants.GameManager;
+	import flash.events.Event;
 	
 	public class ItemPlinth extends Chest 
 	{
@@ -32,6 +33,7 @@ package Objects
 			if(item != null) {
 				if(GameManager.sean.GetInventory().HasFreeSpace()) {
 					if (GameManager.sean.GetInventory().AddItem(item, false)) {
+						dispatchEvent(new Event("Used"));
 						itemHolder.removeChildAt(0);
 						RemoveItem();
 					} else {

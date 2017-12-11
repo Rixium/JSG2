@@ -5,10 +5,14 @@ package Entity
 	import Chat.Conversation;
 	import Chat.Phone;
 	import Items.DoorKey;
+	import Items.HealthUpgradeItem;
 	import Items.Item;
+	import Items.StaminaUpgradeItem;
 	import Items.WeaponItem;
 	import Objects.Door;
+	import Objects.Light;
 	import Rooms.MasRoom;
+	import Screens.YouDiedScreen;
 	import Sounds.SlashFour;
 	import Sounds.SlashOne;
 	import Sounds.SlashThree;
@@ -37,6 +41,7 @@ package Entity
 		var moveDown:Boolean;
 		var moveRight:Boolean;
 		var sprint:Boolean;
+		var startedDeath:Boolean = false;
 		
 		var gameScreen:GameScreen;
 		
@@ -44,7 +49,7 @@ package Entity
 		var sprintResetMaxTime:int = 20;
 
 		var inventory:Inventory;
-
+		var deathScreen:YouDiedScreen;
 		var currentItem:Item;
 		
 		public var phone:Phone;
@@ -53,8 +58,15 @@ package Entity
 		
 		private var roll:Boolean = false;
 		
+		private var light:Light;
+		var lightSize = 400;
+		
+		public var numSteps:int = 0;
 		public var reading:Boolean = false;
 		var attacking:Boolean = false;
+		public var ready:Boolean = true;
+		private var isAttacking:Boolean = false;
+		
 		
 		
 		
@@ -66,6 +78,9 @@ package Entity
 			y = 420;
 			scaleX = 2;
 			scaleY = 2;
+			
+			xScale = scaleX;
+			yScale = scaleY;
 			stats = new Stats(10, 100, 100);
 			mouseEnabled = false;
 			description = "Handsome fellow.";
@@ -78,33 +93,69 @@ package Entity
 			GameManager.ui.SetStamina(stats.stamina);
 			GameManager.ui.SetHealth(stats.health);
 			GameManager.ui.SetInventory(inventory);
-			
 			this.hurtSounds = new Array(new HurtOne());
 			super.Initialize();
+		}
+		
+		private function GiveDebugItems() {
+			var item:WeaponItem = new WeaponItem(ItemImages.BOW, WeaponTypes.BOW, 5);
+			item.displayName = "Billy's Bow";
+			item.description = "Better than nothing.";
+			
+			var item2:WeaponItem = new WeaponItem(ItemImages.SEPTICSWORD, WeaponTypes.SEPTICSWORD, 100);
+			item2.displayName = "Sword";
+			item2.description = "Too powerful debug weapon.";
+			
+			inventory.AddItem(item, true);
+			inventory.AddItem(item2, true);
+		}
+		
+		private function StopAttack(e:MouseEvent) {
+			isAttacking = false;
+		}
+		
+		private function StartAttack(e:MouseEvent) {
+			isAttacking = true;
 		}
 		
 		public override function Initialize() {
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_UP, KeyUp);
-			GameManager.main.addEventListener(MouseEvent.CLICK, Attack);
+			GameManager.main.addEventListener(MouseEvent.MOUSE_DOWN, StartAttack);
+			GameManager.main.addEventListener(MouseEvent.MOUSE_UP, StopAttack);
+			
 			gotoAndStop("Idle");
 			weaponSlot = new WeaponSlot(this);
 			
-			var weapon:WeaponItem = new WeaponItem(ItemImages.SEPTICSWORD, WeaponTypes.SEPTICSWORD, 100);
-				weapon.displayName = "Septic Sword";
-				weapon.description = "The legendary septic sword.";
-				
-				inventory.AddItem(weapon, true);
+			//GiveDebugItems();
 		}
 		
-		private function Attack(e:MouseEvent) {
-			if(stats.stamina >= AbilityCosts.ATTACK) {
-				if (!attacking && weaponSlot.GetWeapon() != null && !roll && currentLabel == "Idle" && !phone.inCall) {
-					attacking = true;
-					seanBody.addEventListener("CheckHit", CheckHit);
-					seanBody.body.gotoAndPlay("Attack1");
-					seanBody.addEventListener("AttackFinished", EndAttack);
-					stats.stamina -= AbilityCosts.ATTACK;
+		private function Attack() {
+			if(!GameManager.gameScreen.paused) {
+				if(stats.stamina >= AbilityCosts.ATTACK) {
+					if (!attacking && weaponSlot.GetWeapon() != null && !roll && currentLabel == "Idle" && !phone.inCall) {
+						attacking = true;
+						switch(weaponSlot.GetWeapon().weaponStyle) {
+							case WeaponStyles.SLASH:
+								seanBody.addEventListener("CheckHit", CheckHit);
+								seanBody.body.gotoAndPlay("Attack1");
+								seanBody.addEventListener("AttackFinished", EndAttack);
+								break;
+							case WeaponStyles.SHOTGUN:
+								seanBody.addEventListener("ShootBullets", ShootBullets);
+								seanBody.body.gotoAndPlay("ShotgunAttack");
+								seanBody.addEventListener("ShotgunFinished", EndAttack);
+								break;
+							case WeaponStyles.BOW:
+							seanBody.addEventListener("ShootBullets", ShootBullets);
+							seanBody.body.gotoAndPlay("BowAttack");
+							seanBody.addEventListener("AttackFinished", EndAttack);
+							break;
+							default:
+								break;
+						}
+						stats.stamina -= AbilityCosts.ATTACK;
+					}
 				}
 			}
 		}
@@ -112,132 +163,222 @@ package Entity
 		private function CheckHit(e:Event) {
 			GameManager.gameScreen.GetRoom().AttackEntities(this, weaponSlot.GetWeapon());
 			seanBody.removeEventListener("CheckHit", CheckHit);
+			weaponSlot.GetWeapon().PlaySound();
 		}
 		
 		private function EndAttack(e:Event) {
 				attacking = false;
 				if (seanBody.legs.currentLabel == "Walk") {
 					seanBody.removeEventListener("AttackFinished", EndAttack);
-					seanBody.body.gotoAndPlay("Walk");
+					StartWalk();
 				} else if (seanBody.legs.currentLabel == "Idle") {
-					seanBody.body.gotoAndStop("Idle");
 					seanBody.removeEventListener("AttackFinished", EndAttack);
+					StartIdle();
 				}
 		}
 		
 		public override function Update():void {
-			phone.Check();
-			
-			if(stats.stamina < stats.maxStamina) {
-				if(sprintResetTimer > 0) {
-					sprintResetTimer--;
-				} else {
-					stats.stamina++;
-				}
-			}
-			
-			if (stats.health <= 0) {
-				Die();
-			}
-			
-			var newX:int = x;
-			var newY:int = y;
-			
-			var speed:int = stats.speed;
-			var canSprint:Boolean = false;
-			
-			if(moveLeft || moveRight || moveDown || moveUp) {
-				if(sprint) {
-					if(stats.stamina - AbilityCosts.RUN >= 0) {
-						speed = stats.runSpeed;
-						canSprint = true;
+			super.Update();
+			if (ready) {
+				if (isAttacking) {
+					Attack();
+					if (GameManager.gameScreen.GetRoom().mouseX < getBounds(GameManager.gameScreen.GetRoom()).x + width / 2) {
+						scaleX = -xScale;
 					} else {
-						if(stats.stamina != 0) {
-							speed = stats.runSpeed;
-							canSprint = true;
-						}
+						scaleX = xScale;
 					}
 				}
-			}
-			
-			if(moveLeft) {
-				newX -= speed;
-				scaleX = -2;
-				
-			} else if (moveRight) {
-				newX += speed;
-				scaleX = 2;
-			}
-			
-			if(moveUp) {
-				newY -= speed;
-			} else if (moveDown) {
-				newY += speed;
-			}
-			
-			if (roll) {
-				speed = stats.runSpeed;
-				if (scaleX > 0) {
-					newX += speed;
-				} else if (scaleX < 0) {
-					newX -= speed;
+				if (light != null ) {
+					if(!roll) {
+						light.x = weaponSlot.getBounds(GameManager.gameScreen.roomLayer).x + weaponSlot.width / 2 - lightSize / 2;
+						light.y = weaponSlot.getBounds(GameManager.gameScreen.roomLayer).y + weaponSlot.height / 2 - lightSize / 2;
+					} else {
+						light.x = getBounds(GameManager.gameScreen.roomLayer).x + width / 2 - lightSize / 2;
+						light.y = getBounds(GameManager.gameScreen.roomLayer).y + height / 2 - lightSize / 2;
+					}
 				}
-			}
-			
-			if (!moveUp && !moveRight && !moveDown && !moveLeft && !roll) {
-				StartIdle();
-			}
-			
-			if(!knockedBack) {
-				if (newX != x || newY != y) {
-					var lastX:int = x;
-					var lastY:int = y;
+				
+				phone.Check();
+				
+				if(currentLabel != "ItemGet") {
+					if(stats.stamina < stats.maxStamina) {
+						if(sprintResetTimer > 0) {
+							sprintResetTimer--;
+						} else {
+							stats.stamina++;
+						}
+					}
 					
-					x = newX;
-					y = newY;
+					if (stats.health <= 0) {
+						Die();
+					}
 					
-					if(gameScreen.GetRoom().CheckAble(this, false)) {
-						if(canSprint) {
-							stats.stamina -= AbilityCosts.RUN;
-							sprintResetTimer = sprintResetMaxTime;
-							if(stats.stamina < 0) {
-								stats.stamina = 0;
+					var newX:int = x;
+					var newY:int = y;
+					
+					var speed:int = stats.speed;
+					var canSprint:Boolean = false;
+					
+					if(moveLeft || moveRight || moveDown || moveUp) {
+						if(sprint) {
+							if(stats.stamina - AbilityCosts.RUN >= 0) {
+								speed = stats.runSpeed;
+								canSprint = true;
+							} else {
+								if(stats.stamina != 0) {
+									speed = stats.runSpeed;
+									canSprint = true;
+								}
 							}
 						}
-
-						if (!roll) {
-							StartWalk();
+					}
+					
+					if(moveLeft) {
+						newX -= speed;
+						if(!isAttacking) {
+							scaleX = -xScale;
 						}
-					} else {
-						x = lastX;
-						y = lastY;
-						if(!roll) {
-							StartIdle();
+						
+					} else if (moveRight) {
+						newX += speed;
+						if(!isAttacking) {
+							scaleX = xScale;
 						}
 					}
-				}
-			}
-				
+					
+					if(moveUp) {
+						newY -= speed;
+					} else if (moveDown) {
+						newY += speed;
+					}
+					
+					if (roll) {
+						immune = true;
+						speed = stats.runSpeed;
+						if (scaleX > 0) {
+							newX += speed;
+						} else if (scaleX < 0) {
+							newX -= speed;
+						}
+					}
+					
+					if (!moveUp && !moveRight && !moveDown && !moveLeft && !roll) {
+						StartIdle();
+					}
+					
+					if(!knockedBack) {
+						if (newX != x || newY != y) {
+							var lastX:int = x;
+							var lastY:int = y;
+							
+							x = newX;
+							
+							if (gameScreen.GetRoom().CheckAble(this, false)) {
+								
+							} else {
+								x = lastX;
+							}
 
-			
-			newX = 0;
-			newY = 0;
-			
-			speed = 0;
-			canSprint = false;
-				
-			if(GameManager.ui.GetStamina() != stats.stamina) {
-				GameManager.ui.SetStamina(stats.stamina);
-			}
-			if(GameManager.ui.GetHealth() != stats.health) {
-				GameManager.ui.SetHealth(stats.health);
+							y = newY;
+							
+							if (gameScreen.GetRoom().CheckAble(this, false)) {
+								
+							} else {
+								y = lastY;
+							}
+							
+							if (lastX != x || lastY != y) {
+								if(canSprint) {
+									stats.stamina -= AbilityCosts.RUN;
+									sprintResetTimer = sprintResetMaxTime;
+									if(stats.stamina < 0) {
+										stats.stamina = 0;
+									}
+								}
+								if (!roll) {
+									StartWalk();
+									numSteps++;
+								}
+							} else {
+								if(!roll) {
+									StartIdle();
+								}
+							}
+							
+							/*
+							if(gameScreen.GetRoom().CheckAble(this, false)) {
+								if(canSprint) {
+									stats.stamina -= AbilityCosts.RUN;
+									sprintResetTimer = sprintResetMaxTime;
+									if(stats.stamina < 0) {
+										stats.stamina = 0;
+									}
+								}
+								if (!roll) {
+									StartWalk();
+									numSteps++;
+								}
+							} else {
+								x = lastX;
+								y = lastY;
+								if(!roll) {
+									StartIdle();
+								}
+							}
+							*/
+							
+						}
+					}
+						
+
+					
+					newX = 0;
+					newY = 0;
+					
+					speed = 0;
+					canSprint = false;
+						
+					if(GameManager.ui.GetStamina() != stats.stamina) {
+						GameManager.ui.SetStamina(stats.stamina);
+					}
+					if(GameManager.ui.GetHealth() != stats.health) {
+						GameManager.ui.SetHealth(stats.health);
+					}
+				}
 			}
 		}
 		
+		private function Respawn(e:Event) {
+			canKnockback = true;
+			deathScreen.End();
+			deathScreen = null;
+			if(GameManager.gameScreen.GetRoom().lastRoom != RoomNames.CITY && GameManager.gameScreen.GetRoom().lastRoom != RoomNames.CITYVIEW) {
+				GameManager.gameScreen.SetRoom(RoomNames.lastRoom, GameManager.gameScreen.GetRoom().lastRoom);
+			} else if (GameManager.gameScreen.GetRoom().lastRoom == RoomNames.CITY){
+				GameManager.gameScreen.SetRoom(RoomNames.CITY, RoomNames.ROOFTOP);
+			} else if (GameManager.gameScreen.GetRoom().lastRoom == RoomNames.CITYVIEW) {
+				GameManager.gameScreen.SetRoom(RoomNames.CITYVIEW, RoomNames.CITY);
+				x = 200;
+				y = 450;
+			}
+			
+			startedDeath = false;
+		}
+
 		private function Die() {
-			GameManager.gameScreen.SetRoom(RoomNames.lastRoom, GameManager.gameScreen.GetRoom().lastRoom);
-			stats.health = stats.maxHealth;
-			stats.stamina = stats.maxStamina;
+			if (!startedDeath) {
+				canKnockback = false;
+				GameManager.gameScreen.GetRoom().canUpdate = false;
+				GameManager.gameScreen.musicManager.PlayTrack(RoomTracks.NONE);
+				GameManager.gameScreen.GetRoom().StopShake();
+				GameManager.gameScreen.GetRoom().Clean();
+				deathScreen = new YouDiedScreen();
+				deathScreen.addEventListener("Finished", Respawn);
+				GameManager.ui.addChild(deathScreen);
+				stats.health = stats.maxHealth;
+				stats.stamina = stats.maxStamina;
+				startedDeath = true;
+			}
 		}
 		
 		private function StartWalk() {
@@ -249,8 +390,14 @@ package Entity
 				AddWeaponToHand();
 			}
 			
-			if(seanBody.body.currentLabel != "Walk" && !attacking) {
-				seanBody.body.gotoAndPlay("Walk");
+			if ((seanBody.body.currentLabel != "Walk" && seanBody.body.currentLabel != "IdleShotgun") && !attacking) {
+				if (weaponSlot.GetWeapon() == null || weaponSlot.GetWeapon().weaponStyle == WeaponStyles.SLASH) {
+					seanBody.body.gotoAndPlay("Walk");
+				} else if(weaponSlot.GetWeapon().weaponStyle == WeaponStyles.SHOTGUN) {
+					seanBody.body.gotoAndStop("IdleShotgun");
+				} else if (weaponSlot.GetWeapon().weaponStyle == WeaponStyles.BOW) {
+					seanBody.body.gotoAndStop("IdleBow");
+				}
 			}
 			if(seanBody.legs.currentLabel != "Walk") {
 				seanBody.legs.gotoAndPlay("Walk");
@@ -260,53 +407,80 @@ package Entity
 			}
 		}
 		
+		public function AddHealth(amount:int) {
+			stats.health += amount;
+			if (stats.health > stats.maxHealth) {
+				stats.health = stats.maxHealth;
+			}
+			
+			GameManager.ui.SetHealth(amount);
+		}
+		
 		public function KeyDown(e:KeyboardEvent):void {
-			if(!reading) {
-				if(e.keyCode == Keys.SPRINT) {
-					if(stats.stamina >= AbilityCosts.RUN * 5) {
-						sprint = true;
-					}
-				}
-				
-				if(e.keyCode == Keys.LEFT) {
-					moveLeft = true;
-					moveRight = false;
-				} else if (e.keyCode == Keys.RIGHT) {
-					moveRight = true;
-					moveLeft = false;
-				}
-				
-				if(e.keyCode == Keys.UP) {
-					moveUp = true;
-					moveDown = false;
-				} else if (e.keyCode == Keys.DOWN) {
-					moveDown = true;
-					moveUp = false;
-				}
-				
-				if (e.keyCode == Keys.ROLL && !roll) {
-					if (stats.stamina >= AbilityCosts.ROLL) {
-						if (attacking) {
-							EndAttack(null);
+			if(ready && !GameManager.gameScreen.paused) {
+				if(!reading && currentLabel != "ItemGet") {
+					if(e.keyCode == Keys.SPRINT) {
+						if(stats.stamina >= AbilityCosts.RUN * 5) {
+							sprint = true;
 						}
-						immune = true;
-						roll = true;
-						seanBody.legs.gotoAndStop("Idle");
-						gotoAndStop("Roll");
-						addEventListener("rollFinished", RollFinished);
-						stats.stamina -= AbilityCosts.ROLL;
 					}
-				}
-				
-				for (var i:int = 0; i < Keys.slots.length; i++) {
-					if (e.keyCode == Keys.slots[i]) {
-						inventory.SetSlot(i);
-						break;
+					
+					if(e.keyCode == Keys.LEFT) {
+						moveLeft = true;
+						moveRight = false;
+					} else if (e.keyCode == Keys.RIGHT) {
+						moveRight = true;
+						moveLeft = false;
+					}
+					
+					if(e.keyCode == Keys.UP) {
+						moveUp = true;
+						moveDown = false;
+					} else if (e.keyCode == Keys.DOWN) {
+						moveDown = true;
+						moveUp = false;
+					}
+					
+					if (e.keyCode == Keys.ROLL && !roll && deathScreen == null) {
+						if (stats.stamina >= AbilityCosts.ROLL) {
+							if (attacking) {
+								EndAttack(null);
+							}
+							immune = true;
+							roll = true;
+							numSteps += 15;
+							seanBody.legs.gotoAndStop("Idle");
+							gotoAndStop("Roll");
+							addEventListener("PlayRollSound", PlayRollSound);
+							addEventListener("rollFinished", RollFinished);
+							stats.stamina -= AbilityCosts.ROLL;
+						}
+					}
+					if (e.keyCode == Keys.ROLL && deathScreen != null) {
+						deathScreen.ForceFade();
+					}
+					
+					if (e.keyCode == Keys.BAG) {
+						inventory.OpenBag();
+					}
+					
+					for (var i:int = 0; i < Keys.slots.length; i++) {
+						if (e.keyCode == Keys.slots[i]) {
+							inventory.SetSlot(i);
+							break;
+						}
 					}
 				}
 			}
 		}
 		
+		private function PlayRollSound(e:Event) {
+			removeEventListener("PlayRollSound", PlayRollSound);
+			var rollTrans:SoundTransform = new SoundTransform(GameManager.soundLevel * 2, 0);
+			channel = new RollSound().play(0, 0, rollTrans);
+			rollTrans = null;
+			channel = null;
+		}
 		private function RollFinished(e:Event) {
 			roll = false;
 			immune = false;
@@ -315,9 +489,21 @@ package Entity
 			} else {
 				StartWalk();
 			}
+			removeEventListener("rollFinished", RollFinished);
 		}
 		
-		private function StartIdle() {
+		public function Destroy() {
+			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_UP, KeyUp);
+			GameManager.main.removeEventListener(MouseEvent.CLICK, Attack);
+		}
+		
+		public function StartGetItem(){
+			RollFinished(null);
+			gotoAndStop("ItemGet");
+		}
+		
+		public function StartIdle() {
 			if (currentLabel != "Idle") {
 				gotoAndStop("Idle");
 			}
@@ -325,8 +511,16 @@ package Entity
 				AddWeaponToHand();
 			}
 			seanBody.head.gotoAndPlay("Idle");
-			if(!attacking) {
-				seanBody.body.gotoAndPlay("Idle");
+			if (!attacking) {
+				if(weaponSlot.GetWeapon() == null) {
+					seanBody.body.gotoAndPlay("Idle");
+				} else if (weaponSlot.GetWeapon().weaponStyle == WeaponStyles.SLASH) {
+					seanBody.body.gotoAndPlay("Idle");
+				} else if (weaponSlot.GetWeapon().weaponStyle == WeaponStyles.SHOTGUN) {
+					seanBody.body.gotoAndPlay("IdleShotgun");
+				} else if (weaponSlot.GetWeapon().weaponStyle == WeaponStyles.BOW) {
+					seanBody.body.gotoAndStop("IdleBow");
+				}
 			}
 			seanBody.legs.gotoAndPlay("Idle");
 		}
@@ -354,9 +548,28 @@ package Entity
 			return inventory;
 		}
 		
+		private function ShootBullets(e:Event) {
+			weaponSlot.GetWeapon().PlaySound();
+			weaponSlot.GetWeapon().Shoot(scaleX, this);
+		}
+		
 		public function SetWeapon(weapon:Weapon) {
 			weaponSlot.SetWeapon(weapon);
+			if (weapon.weaponType == WeaponTypes.TORCH) {
+				light = new Light(weaponSlot.getBounds(GameManager.gameScreen.roomLayer).x + weaponSlot.width / 2 - lightSize / 2, weaponSlot.getBounds(GameManager.gameScreen.roomLayer).y + weaponSlot.height / 2 - lightSize / 2 , lightSize, lightSize);
+				GameManager.gameScreen.GetRoom().lightMask.addChild(light);
+			} else {
+				if(light != null) {
+					GameManager.gameScreen.GetRoom().lightMask.removeChild(light);
+					light = null;
+				}
+			}
 			AddWeaponToHand();
+			if (currentLabel == "Idle") {
+				StartIdle();
+			} else if (currentLabel == "Walk") {
+				StartWalk();
+			}
 		}
 		
 		private function AddWeaponToHand() {
@@ -369,6 +582,10 @@ package Entity
 		
 		public function RemoveWeapon() {
 			weaponSlot.RemoveWeapon();
+			if (light != null) {
+				GameManager.gameScreen.GetRoom().lightMask.removeChild(light);
+				light = null;
+			}
 		}
 	}
 }

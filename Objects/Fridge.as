@@ -1,10 +1,11 @@
 package Objects 
 {
+	import Items.Food;
 	/**
 	 * ...
 	 * @author Rixium
 	 */
-	public class Fridge extends ObjectBase 
+	public class Fridge extends Chest 
 	{
 		
 		public function Fridge(x:int, y:int, w:int, h:int) 
@@ -16,6 +17,8 @@ package Objects
 			this.height = h;
 			this.interactable = true;
 			this.collidable = true;
+			this.useText = "Search";
+			this.item = new Food();
 		}
 		
 	}

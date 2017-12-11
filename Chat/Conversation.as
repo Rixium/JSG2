@@ -25,6 +25,10 @@ package Chat
 		public function GetChat():Array {
 			return chatLines;
 		}
+		
+		public function Reset() {
+			currentLine = 0;
+		}
 
 		
 	}

@@ -8,13 +8,18 @@ package Rooms
 	import Objects.*;
 	import Constants.RoomNames;
 	import Items.DoorKey;
+	import Items.HealthUpgradeItem;
+	import Items.Item;
 	import Items.WeaponItem;
 	import Constants.ItemImages;
+	import Weapons.Weapon;
 	
 	import Constants.GameManager;
 	import Constants.DoorTypes;
 	import Constants.WindowTypes;
 	import Constants.WeaponTypes;
+	import Constants.ZombieHeads;
+	import Entity.Zombie;
 	
 	public class KitchenRoom extends Room
 	{
@@ -28,11 +33,25 @@ package Rooms
 		var sink:KitchenCounterSink;
 		var cooker:KitchenCooker;
 		var window:WindowObject;
+		var kettle:Kettle;
+		var pans:KitchenPans;
+		var knifeBlock:KnifeBlock;
 
 		public function KitchenRoom(lastRoom:int) 
 		{
 			super();
 			this.lastRoom = lastRoom;
+		}
+		
+		public override function AddEnemies() {
+			var zombie:Zombie = new Zombie(1123, 345, 40, 50, new Weapon(WeaponTypes.SPADE, 10), ZombieHeads.HEAD2);
+			entityLayer.addChild(zombie);
+			
+			var zombie2:Zombie = new Zombie(747, 400, 40, 50, new Weapon(WeaponTypes.BUTCHERSKNIFE, 10), ZombieHeads.HEAD3);
+			entityLayer.addChild(zombie2);
+			
+			zombie = null;
+			zombie2 = null;
 		}
 		
 		public override function AddObjects():void {
@@ -58,7 +77,7 @@ package Rooms
 			}
 			
 			if (firstVisit) {
-				fridge = new Fridge(1084, 105, 118, 289);
+				fridge = new Fridge(1084, 105, 118, 304);
 				fridge.displayName = "Fridge";
 				fridge.description = "Mmmm, food.";
 				
@@ -66,7 +85,7 @@ package Rooms
 				counter.displayName = "Counter";
 				counter.description = "For easy food preparation.";
 				
-				counter2 = new HalfKitchenCounter(183, 226, 155, 168);
+				counter2 = new HalfKitchenCounter(184, 226, 155, 168);
 				counter2.displayName = "Counter";
 				counter2.description = "For easy food preparation.";
 				
@@ -74,22 +93,30 @@ package Rooms
 				sink.displayName = "Sink";
 				sink.description = "What's a kitchen without a sink?";
 				
-				cooker = new KitchenCooker(491, 226, 128, 168);
+				cooker = new KitchenCooker(493, 226, 128, 168);
 				cooker.displayName = "Cooker";
 				cooker.description = "The timer is broken.";
 				
-				var weap:WeaponItem = new WeaponItem(ItemImages.BUTCHERSKNIFE, WeaponTypes.BUTCHERSKNIFE, 5);
-				weap.displayName = "Butcher's Knife";
-				weap.description = "Sharp, but short.";
+				var health:HealthUpgradeItem = new HealthUpgradeItem();
 				
-				drawers = new KitchenDrawers(338, 226, 155, 218);
+				drawers = new KitchenDrawers(339, 226, 155, 218);
 				drawers.displayName = "Kitchen Drawers";
 				drawers.description = "A place to store cutlery.";
-				drawers.SetItem(weap);
+				drawers.SetItem(health);
 				
 				window = new WindowObject(497, 45, 308, 154, WindowTypes.KITCHEN);
 				window.displayName = "Window";
 				window.description = "I can see the back garden through it.";
+				
+				kettle = new Kettle(799, 194, 112, 59);
+				kettle.displayName = "Kettle";
+				kettle.description = "Tasty coffee.";
+				
+				pans = new KitchenPans(272, 38, 163, 99);
+				pans.displayName = "Pans";
+				pans.description = "Made for frying food.";
+				
+				knifeBlock = new KnifeBlock(218, 175, 46, 73);
 				
 				objects.push(fridge);
 				objects.push(counter);
@@ -102,15 +129,20 @@ package Rooms
 			}
 
 			fridge.Initialize();
+			fridge.UseInitialize();
 			counter.Initialize();
 			counter2.Initialize();
 			sink.Initialize();
 			cooker.Initialize();
 			drawers.Initialize();
 			drawers.UseInitialize();
-
+			kettle.Initialize();
 			door.Initialize();
 			door.UseInitialize();
+			
+			knifeBlock.Initialize();
+			
+			pans.Initialize();
 			
 			door2.Initialize();
 			door2.UseInitialize();
@@ -126,7 +158,9 @@ package Rooms
 			bLayer.addChild(cooker);
 			bLayer.addChild(window);
 			bLayer.addChild(door2);
-			
+			bLayer.addChild(kettle);
+			bLayer.addChild(pans);
+			bLayer.addChild(knifeBlock);
 
 			if (lastRoom != RoomNames.NONE) {
 				for (var i:int = 0; i < doors.length; i++) {

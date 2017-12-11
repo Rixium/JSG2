@@ -2,6 +2,7 @@ package Constants
 {
 
 	import Rooms.*;
+	import flash.system.System;
 	
 	/**
 	 * ...
@@ -21,6 +22,9 @@ package Constants
 		public static var GARDEN = 7;
 		public static var SHED = 8;
 		public static var SPECIALROOM = 9;
+		public static var CITYVIEW = 10;
+		public static var CITY = 11;
+		public static var ROOFTOP = 12;
 		
 		public static var SEANINSTANCE:SeansRoom = null;
 		public static var HALLINSTANCE:HallwayRoom = null;
@@ -32,6 +36,9 @@ package Constants
 		public static var SHEDINSTANCE:ShedRoom = null;
 		public static var SPECIALINSTANCE:SpecialRoom = null;
 		public static var ATTICINSTANCE:AtticRoom = null;
+		
+		public static var CITYVIEWINSTANCE:CityViewRoom = null;
+		public static var CITYINSTANCE:CityRoom = null;
 		
 		public static var lastRoom:int;
 		
@@ -57,6 +64,12 @@ package Constants
 					return "Shed";
 				case SPECIALROOM:
 					return "";
+				case CITYVIEW:
+					return "City";
+				case CITY:
+					return "City";
+				case ROOFTOP:
+					return "Rooftop";
 				default:
 					break;
 			}
@@ -95,7 +108,7 @@ package Constants
 					}
 					return HALLINSTANCE;
 				case ATTIC:
-					if(ATTICINSTANCE == null) {
+					if(ATTICINSTANCE == null || !GameManager.maKilled) {
 						ATTICINSTANCE = new AtticRoom(currentRoom);
 					} else {
 						ATTICINSTANCE.lastRoom = currentRoom; 
@@ -151,12 +164,63 @@ package Constants
 						SPECIALINSTANCE.lastRoom = currentRoom;
 					}
 					return SPECIALINSTANCE;
+				case CITYVIEW:
+					if (CITYVIEWINSTANCE == null) {
+						CITYVIEWINSTANCE = new CityViewRoom(currentRoom);
+					} else {
+						CITYVIEWINSTANCE.lastRoom = currentRoom;
+					}
+					ClearAllHouseInstances();
+					return CITYVIEWINSTANCE;
+				case CITY:
+					if (CITYINSTANCE == null) {
+						CITYINSTANCE = new CityRoom(currentRoom);
+					} else {
+						CITYINSTANCE.lastRoom = currentRoom;
+					}
+					CITYVIEWINSTANCE = null;
+					return CITYINSTANCE;
+				case ROOFTOP:
+					var roofTop = new Rooftop(currentRoom);
+					CITYINSTANCE = null;
+					return roofTop;
 				default:
 					break;
 			}
 			
 			return null;
 		}
+		
+		public static function Reset() {
+			SEANINSTANCE = null;
+			HALLINSTANCE = null;
+			MASINSTANCE = null;
+			LIVINGINSTANCE = null;
+			KITCHENINSTANCE = null;
+			BASEMENTINSTANCE = null;
+			GARDENINSTANCE = null;
+			SHEDINSTANCE = null;
+			SPECIALINSTANCE = null;
+			ATTICINSTANCE = null;
+			CITYINSTANCE = null;
+			CITYVIEWINSTANCE = null;
+			System.gc();
+		}
+		
+		private static function ClearAllHouseInstances() {
+			SEANINSTANCE = null;
+			HALLINSTANCE = null;
+			MASINSTANCE = null;
+			LIVINGINSTANCE = null;
+			KITCHENINSTANCE = null;
+			BASEMENTINSTANCE = null;
+			GARDENINSTANCE = null;
+			SHEDINSTANCE = null;
+			SPECIALINSTANCE = null;
+			ATTICINSTANCE = null;
+			System.gc();
+		}
+		
 	}
 
 }

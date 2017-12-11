@@ -28,7 +28,7 @@ package Chat
 		public function Phone() 
 		{
 			super();
-			trans = new SoundTransform(GameManager.soundLevel, 0); 
+			
 			
 			this.x = GameManager.main.stage.stageWidth - this.width - 20;
 			this.y = GameManager.main.stage.stageHeight - this.height - 10;
@@ -41,6 +41,7 @@ package Chat
 				GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, StartPhoneByKeyboard);
 				ringing = true;
 				GameManager.main.addChild(this);
+				trans = new SoundTransform(GameManager.soundLevel, 0); 
 				var ringSound:RingtoneSound = new RingtoneSound();;
 				channel = ringSound.play(0, 9999, trans);
 				ringSound = null;
@@ -48,6 +49,7 @@ package Chat
 				if (conversation == null && ringing) {
 					inCall = false;
 					ringing = false;
+					trans = new SoundTransform(GameManager.soundLevel, 0);
 					var hangUp:HangupSound = new HangupSound();;
 					channel = hangUp.play(0, 0, trans);
 					hangUp = null;
@@ -64,8 +66,9 @@ package Chat
 				if (!chatting) {
 					channel.stop();
 					channel = null;
+					trans = new SoundTransform(GameManager.soundLevel, 0);
 					var answerPhone:AnswerPhone = new AnswerPhone();
-					answerPhone.play();
+					answerPhone.play(0, 0, trans);
 					answerPhone = null;
 					chatting = true;
 					StartChat();
@@ -82,8 +85,9 @@ package Chat
 				removeEventListener(MouseEvent.CLICK, StartPhone);
 				channel.stop();
 				channel = null;
+				trans = new SoundTransform(GameManager.soundLevel, 0);
 				var answerPhone:AnswerPhone = new AnswerPhone();
-				answerPhone.play();
+				answerPhone.play(0, 0, trans);
 				answerPhone = null;
 				chatting = true;
 				StartChat();

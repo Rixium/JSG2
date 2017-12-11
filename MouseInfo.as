@@ -14,7 +14,9 @@ package
 		}
 		
 		public function SetText(s:String):void {
-			text.text = s;
+			if(GameManager.sean.GetInventory().GetMouseItem() == null) {
+				text.text = s;
+			}
 		}
 		
 		public function GetText():String {

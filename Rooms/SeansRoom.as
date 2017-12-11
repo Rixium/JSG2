@@ -8,8 +8,17 @@ package Rooms
 	import Objects.*;
 	import Constants.*;
 	import Items.*;
+	import Helpers.TutorialManager;
 	import Sounds.MainSound;
 	import Weapons.Weapon;
+	import Entity.Zombie;
+	import flash.events.Event;
+	import flash.utils.Timer;
+	import flash.events.TimerEvent;
+	import flash.media.SoundTransform;
+	import flash.media.SoundChannel;
+	import Sounds.ItemPopup;
+	import Entity.Smoke;
 	
 	public class SeansRoom extends Room
 	{
@@ -30,22 +39,85 @@ package Rooms
 		var keyboardObject:ComputerKeyboard;
 		var mouseObject:ComputerMouse;
 		var televisionStand:TelevisionStand;
+		var lavaLamp:LavaLamp;
+		var gamePad:GamePad
+		var startedConvo:Boolean = false;
+		var timer:Timer;
+		var initializedUsable:Boolean = false;
+		
+		var tutorialManager:TutorialManager;
 		
 		public function SeansRoom(lastRoom:int) 
 		{
 			super();
 			this.lastRoom = lastRoom;
+			roomTrack = RoomTracks.MAIN;
+		}
+		
+		public override function AddEnemies() {
+			var zombie:Zombie = new Zombie(1100, 300, 40, 50, new Weapon(WeaponTypes.BOW, 20), ZombieHeads.BILLY);
+			
+			
+			zombie.addEventListener("Killed", BillyDead);
+			zombie.GetStats().vision = 1000;
+			zombie.displayName = "Billy";
+			zombie.description = "Damnit, Billy!";
+			entityLayer.addChild(zombie);
+			zombie = null;
+		}
+		
+		private function BillyDead(e:Event) {
+			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
+			var smoke:Smoke = new Smoke(1280 / 2 - 100 , 720 / 2 + 100);
+			fLayer.addChild(smoke);
+			GameManager.gameScreen.FollowEntity(smoke);
+			smoke.addEventListener("Finished", FollowSean);
+			smoke = null;
+		}
+		
+		private function FollowSean(e:Event) {
+			var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
+			var channel:SoundChannel = new ItemPopup().play(0, 0, trans);
+			trans = null;
+			channel = null;
+			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
+			var item:WeaponItem = new WeaponItem(ItemImages.BOW, WeaponTypes.BOW, 5);
+			item.displayName = "Billy's Bow";
+			item.description = "A child's play thing.";
+			timer = new Timer(1000, 1);
+			timer.addEventListener(TimerEvent.TIMER, FollowBack);
+			timer.start();
+			var drop:Drop = new Drop(1280 / 2 - 100, 720 / 2 + 100, item)
+			GameManager.gameScreen.GetRoom().AddDrop(drop);
+			drop.Initialize();
+			drop.UseInitialize();
+			drop = null;
+			item = null;
+		}
+		
+		private function FollowBack(e:TimerEvent) {
+			timer.removeEventListener(TimerEvent.TIMER, FollowBack)
+			timer = null;
+			GameManager.gameScreen.FollowEntity(GameManager.sean);
 		}
 		
 		public override function AddObjects():void {
 			var bLayer:MovieClip = getChildByName("backgroundObjects") as MovieClip;
 			var fLayer:MovieClip = getChildByName("foregroundObjects") as MovieClip;
-			
+			initializedUsable = false;
 			if (firstVisit) {
-				//GameManager.sean.phone.InitiateConversation(Conversations.conversation1);
 				firstVisit = false;
-				GameManager.gameScreen.PlayTrack(new MainSound(), true);
+				
+				lavaLamp = new LavaLamp(57, 169, 34, 95);
+				gamePad = new GamePad(190, 551, 58, 49);
+				objects.push(gamePad);
+				
+				tutorialManager = new TutorialManager();
+				tutorialManager.start();
+				
 			}
+			
+			
 			
 			if(studioLight == null) {
 				studioLight = new StudioLight(680, 88, 106, 280);
@@ -87,13 +159,14 @@ package Rooms
 				objects.push(shelf);
 			}
 			if(door == null) {
-				door = new Door(450, 61, 125, 312, true, RoomNames.HALLWAY, RoomNames.SEANSROOM, DoorTypes.SLIME);
+				door = new Door(460, 61, 125, 312, true, RoomNames.HALLWAY, RoomNames.SEANSROOM, DoorTypes.SLIME);
 				door.displayName = "Door";
 				door.description = "Covered in gross green slime..";
 				door.interactable = true;
 				objects.push(door);
 				doors.push(door);
 			}
+			
 			if(rug == null) {
 				rug = new Rug(320, 400, 715, 267);
 				rug.displayName = "Rug";
@@ -116,8 +189,6 @@ package Rooms
 			if (book == null) {
 				var info:BookInfo = new BookInfo(BookTexts.SEANSROOMBOOK[0], BookTexts.SEANSROOMBOOK[1]);
 				book = new Book(843, 227, 52, 166, info);
-				book.displayName = "Book";
-				book.description = "Perhaps I should read that..";
 				objects.push(book);
 				info = null;
 			}
@@ -186,18 +257,20 @@ package Rooms
 			fLayer.addChild(televisionStand);
 			fLayer.addChild(television);
 			fLayer.addChild(plant);
+			bLayer.addChild(lavaLamp);
+			bLayer.addChild(gamePad);
 			
+			gamePad.Initialize();
+			lavaLamp.Initialize();
 			studioLight.Initialize();
-			cabinet.Initialize();
-			cabinet.UseInitialize();
+			
 			desk.Initialize();
 			shelf.Initialize();
-			door.Initialize();
-			door.UseInitialize();
+			
+			
 			rug.Initialize();
 			bed.Initialize();
-			book.Initialize();
-			book.UseInitialize();
+			
 			computerScreen.Initialize();
 			computerTower.Initialize();
 			plant.Initialize();
@@ -222,6 +295,31 @@ package Rooms
 			bLayer = null;
 			fLayer = null;
 			
+		}
+		
+		override public function Update():void 
+		{
+			super.Update();
+			
+			if(!initializedUsable) {
+				if (tutorialManager.finished) {
+
+					cabinet.Initialize();
+					door.Initialize();
+					book.Initialize();
+					door.UseInitialize();
+					book.UseInitialize();
+					cabinet.UseInitialize();
+					initializedUsable = true;
+				}
+			}
+					
+			if(!startedConvo) {
+				if (GameManager.sean.numSteps >= 20 && tutorialManager.finished) {
+					GameManager.sean.phone.InitiateConversation(Conversations.conversation1);
+					startedConvo = true;
+				}
+			}
 		}
 		
 	}

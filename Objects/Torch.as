@@ -14,6 +14,8 @@ package Objects
 		
 		private var item:Item;
 		public var canTake:Boolean;
+		var light:Light;
+		var lightSize = 600;
 		
 		public function Torch(x:int, y:int, w:int, h:int)
 		{
@@ -30,6 +32,8 @@ package Objects
 			this.item = weaponItem;
 			weaponItem = null;
 			gotoAndPlay("Torch");
+			light = new Light(x - lightSize / 2, y - lightSize / 2, lightSize, lightSize);
+			GameManager.gameScreen.GetRoom().lightMask.addChild(light);
 		}
 		
 		public function SetItem(item:Item) {
@@ -50,6 +54,7 @@ package Objects
 				if(item != null) {
 					if(GameManager.sean.GetInventory().HasFreeSpace()) {
 						if (GameManager.sean.GetInventory().AddItem(item, item.forcePickup)) {
+							GameManager.gameScreen.GetRoom().lightMask.removeChild(light);
 							this.useText = "Place";
 							var character:String = Keys.GetDictionary()[Keys.USE];
 							GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
@@ -66,6 +71,7 @@ package Objects
 					if (GameManager.sean.GetWeapon() != null) {
 						if (GameManager.sean.GetWeapon().weaponType == WeaponTypes.TORCH) {
 							GameManager.sean.RemoveWeapon();
+							GameManager.gameScreen.GetRoom().lightMask.addChild(light);
 							var itemToRemove:WeaponItem = new WeaponItem(ItemImages.TORCH, WeaponTypes.TORCH, 1);
 							itemToRemove.displayName = "Torch";
 							itemToRemove.description = "It's fiery, but not very strong.";

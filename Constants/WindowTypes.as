@@ -8,6 +8,7 @@ package Constants
 	{
 		
 		public static var KITCHEN:String = "kitchen";
+		public static var MASROOM:String = "maRoomClosed";
 		
 	}
 

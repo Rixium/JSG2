@@ -11,6 +11,7 @@ package Objects
 	import Sounds.LockedDoorSound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.media.Sound;
 	import Items.DoorKey;
 	import Constants.DoorTypes;
 	import Constants.ItemImages;
@@ -58,8 +59,9 @@ package Objects
 		}
 		
 		protected override function Use():void {
+			super.Use();
 			if (door.currentLabel == "open") {
-				var closeDoorSound:DoorCloseSound = new DoorCloseSound();;
+				var closeDoorSound:Sound = DoorTypes.GetSound(doorType);
 				var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0); 
 				var channel:SoundChannel = closeDoorSound.play(0, 1, trans);
 				closeDoorSound = null;

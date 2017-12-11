@@ -6,12 +6,8 @@ package Rooms
 	 */
 	
 	import Objects.*;
-	import Constants.RoomNames;
 	import Entity.Brazier;
-	
-	import Constants.GameManager;
-	import Constants.DoorTypes;
-	import Constants.Conversations;
+	import Constants.*;
 	import flash.events.Event;
 	
 	public class BasementRoom extends Room
@@ -26,10 +22,16 @@ package Rooms
 		var specialDoor:SpecialDoor;
 		var opening:Boolean = false;
 		
+		var startSteps:int = 0;
+		var startedConvo:Boolean = false;
+		
 		public function BasementRoom(lastRoom:int) 
 		{
 			super();
 			this.lastRoom = lastRoom;
+			roomTrack = RoomTracks.BASEMENT;
+			GameManager.gameScreen.Follow(false);
+			startSteps = GameManager.sean.numSteps;
 		}
 		
 		public override function AddObjects():void {
@@ -40,7 +42,7 @@ package Rooms
 			
 			if (firstVisit) {
 				firstVisit = false;
-				GameManager.sean.phone.InitiateConversation(Conversations.conversation3);
+				
 				
 				
 				
@@ -142,6 +144,18 @@ package Rooms
 				this.x = startX;
 				this.y = startY;
 				removeEventListener(Event.ENTER_FRAME, CheckDoors);
+			}
+		}
+		
+		override public function Update():void 
+		{
+			super.Update();
+			
+			if (!startedConvo) {
+				if (GameManager.sean.numSteps >= startSteps + 30) {
+					GameManager.sean.phone.InitiateConversation(Conversations.conversation3);
+					startedConvo = true;
+				}
 			}
 		}
 

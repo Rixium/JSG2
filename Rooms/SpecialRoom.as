@@ -8,6 +8,7 @@ package Rooms
 	import Objects.*;
 	import Constants.RoomNames;
 	import flash.accessibility.Accessibility;
+	import flash.events.Event;
 	import flash.globalization.Collator;
 	
 	import Constants.GameManager;
@@ -16,7 +17,6 @@ package Rooms
 	import Items.WeaponItem;
 	import Constants.ItemImages;
 	import Constants.WeaponTypes;
-		
 	
 	public class SpecialRoom extends Room
 	{
@@ -28,6 +28,11 @@ package Rooms
 		{
 			super();
 			this.lastRoom = lastRoom;
+			GameManager.gameScreen.Follow(false);
+		}
+		
+		private function GotSword(e:Event) {
+			GameManager.gotSepticSword = true;
 		}
 		
 		public override function AddObjects():void {
@@ -48,7 +53,7 @@ package Rooms
 				exitDoor.useText = "To Basement";
 				
 				plinth = new ItemPlinth(598, 350, 82, 228);
-				var weapon:WeaponItem = new WeaponItem(ItemImages.SEPTICSWORD, WeaponTypes.SEPTICSWORD, 10);
+				var weapon:WeaponItem = new WeaponItem(ItemImages.SEPTICSWORD, WeaponTypes.SEPTICSWORD, 7);
 				weapon.displayName = "Septic Sword";
 				weapon.description = "The legendary septic sword.";
 				GameManager.sean.phone.InitiateConversation(Conversations.septicSwordConvo);
@@ -56,6 +61,7 @@ package Rooms
 				weapon = null;
 				plinth.displayName = "Plinth";
 				plinth.description = "Holder of an epic item.";
+				plinth.addEventListener("Used", GotSword);
 				objects.push(plinth);
 			}
 

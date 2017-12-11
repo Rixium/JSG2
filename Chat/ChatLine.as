@@ -1,5 +1,6 @@
 package Chat 
 {
+	import flash.media.Sound;
 	
 	/**
 	 * ...
@@ -10,6 +11,8 @@ package Chat
 		
 		public var talker:int;
 		public var chatLine:String;
+		public var audio:Sound;
+		public var characterTime:int = 0;
 		
 		public function ChatLine(talker:int, chatLine:String) 
 		{

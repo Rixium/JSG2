@@ -32,6 +32,7 @@ package Objects
 		}
 		
 		protected override function Use():void {
+			super.Use();
 			if(item != null) {
 				if(GameManager.sean.GetInventory().HasFreeSpace()) {
 					if (GameManager.sean.GetInventory().AddItem(item, false)) {

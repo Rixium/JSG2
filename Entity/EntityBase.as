@@ -19,26 +19,38 @@ package Entity
 	{
 		
 		protected var stats:Stats;
-		protected var description:String;
-		protected var displayName:String;
+		public var description:String;
+		public var displayName:String;
 		protected var weaponSlot:WeaponSlot;
-		protected var immune:Boolean = false;
+		public var immune:Boolean = false;
 		public var eBounds:MovieClip;
 		public var dead:Boolean;
-		protected var canKnockback = true;
+		public var canKnockback = true;
 		
 		protected var knockedBack = false;
 		protected var knockbackTimer:Timer;
 		protected var knockbackPower = 0;
 		protected var knockbackDir:Number = 0;
-		protected var hurtSounds:Array;
+		protected var hurtSounds:Array = [];
 		var channel:SoundChannel
 		var startColor:ColorTransform;
+		var immuneTime:int = 30;
+		var immuneTimer:int;
+		
+		public var xScale:Number;
+		public var yScale:Number;
 
 		public function EntityBase()
 		{
-			eBounds = getChildByName("bounds") as MovieClip;
-			
+			xScale = 1;
+			yScale = 1;
+			if(getChildByName("bounds") != null) {
+				eBounds = getChildByName("bounds") as MovieClip;
+			}
+		}
+		
+		public function GetHitBounds():MovieClip {
+			return getChildByName("mouseOverBounds") as MovieClip;
 		}
 		
 		public function Initialize() {
@@ -66,7 +78,11 @@ package Entity
 		}
 		
 		public function Update():void {
-			
+			if (immuneTimer > 0) {
+				immuneTimer--;
+			} else if (immuneTimer <= 0) {
+				immune = false;
+			}
 		}
 		
 		protected function Kill(e:Event):void {
@@ -88,6 +104,7 @@ package Entity
 		}
 		
 		public function Hit(e:EntityBase, power:int, knockback:int, dir:Number) {
+			stats.vision = 1000;
 			if(!immune) {
 				if (!knockedBack && canKnockback) {
 					knockedBack = true;
@@ -103,13 +120,19 @@ package Entity
 					knockbackTimer.start();
 				}
 				
-				var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
-				var soundToPlay = randomRange(0, hurtSounds.length - 1);
-				var hurtSound:Sound = hurtSounds[soundToPlay] as Sound;
-				channel = hurtSound.play(0, 0, trans);
-				hurtSound = null;
-				trans = null;
+				if(immuneTimer == 0) {
+					if(hurtSounds.length > 0) {
+						var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0);
+						var soundToPlay = randomRange(0, hurtSounds.length - 1);
+						var hurtSound:Sound = hurtSounds[soundToPlay] as Sound;
+						channel = hurtSound.play(0, 0, trans);
+						hurtSound = null;
+						trans = null;
+					}
+				}
 				this.stats.health -= power;
+				immune = true;
+				immuneTimer = immuneTime;
 			}
 		}
 		

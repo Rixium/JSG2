@@ -1,6 +1,7 @@
 package Objects
 {
 	
+	import Entity.DescriptionBox;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.events.Event;
@@ -25,7 +26,6 @@ package Objects
 			useBounds = getChildByName("interactBounds") as MovieClip;
 			useBounds.addEventListener(MouseEvent.MOUSE_OVER, MouseOver);
 			useBounds.addEventListener(MouseEvent.MOUSE_OUT, MouseOut);
-			//useBounds.addEventListener(MouseEvent.CLICK, MouseClick);
 			addEventListener(Event.REMOVED_FROM_STAGE, OnRemove);
 		}
 		
@@ -46,7 +46,9 @@ package Objects
 		}
 		
 		public function MouseClick(e:MouseEvent):void {
-			if(interactable) {
+			if (interactable) {
+				var descriptionBox:DescriptionBox = new DescriptionBox(description, GameManager.sean);
+				descriptionBox = null;
 				GameManager.ui.SetDescriptor(description, false);
 			}
 		}

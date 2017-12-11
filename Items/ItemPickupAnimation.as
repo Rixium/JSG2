@@ -16,6 +16,7 @@ package Items
 	 import flash.media.SoundChannel;
 	 import flash.media.SoundTransform;
 	 import flash.text.TextFormat;
+	 import Constants.ItemTypes;
 	 
 	public class ItemPickupAnimation extends MovieClip
 	{
@@ -39,13 +40,21 @@ package Items
 			textBox.text = item.displayName;
 			
 			var textBox2:TextField = itemDesText.getChildByName("itemGetText") as TextField;
-			textBox2.text = item.description;
+			
+			
+			if (item.itemType == ItemTypes.WEAPON) {
+				var wep:WeaponItem = item as WeaponItem;
+				textBox2.text = "Damage +" + wep.power + "\n" + wep.description;
+				wep = null;
+			} else {
+				textBox2.text = item.description;
+			}
 			var f:TextFormat = textBox2.getTextFormat();
 			f.size = 20;
 			textBox2.setTextFormat(f);
 			
 			var itemFindSound:ItemFindSound = new ItemFindSound();;
-			var trans:SoundTransform = new SoundTransform(0.2, 0); 
+			var trans:SoundTransform = new SoundTransform(GameManager.soundLevel, 0); 
 			var channel:SoundChannel = itemFindSound.play(0, 1, trans);
 			itemFindSound = null;
 			trans = null;
@@ -59,8 +68,10 @@ package Items
 			GameManager.sean.GetInventory().AddItem(item, true);
 			item = null;
 			GameManager.ui.removeChild(this);
+			GameManager.sean.StartIdle();
 			removeEventListener("Finished", RemoveFromStage);
 			GameManager.main.stage.removeEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			GameManager.main.stage.focus = GameManager.gameScreen.GetRoom();
 		}
 		
 		public function KeyDown(e:Event) {

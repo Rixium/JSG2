@@ -1,6 +1,7 @@
 package
 {
 	
+	import Entity.DescriptionBox;
 	import Entity.Inventory;
 	import UIObjects.HealthBar;
 	import flash.display.MovieClip;
@@ -16,7 +17,7 @@ package
 		public var objectDescriptor:TextField;
 		public var staminaDisplay:TextField;
 		public var healthDisplay:TextField;
-		private var inventory:Inventory;
+		public var inventory:Inventory;
 		
 		var descriptionTimer:Timer = new Timer(3000, 1);
 		private var stamina:int;
@@ -24,6 +25,7 @@ package
 		
 		private var healthBar:HealthBar = new HealthBar();
 		private var staminaBar:HealthBar = new HealthBar();
+		private var boxes:Array = [];
 		
 		public function UI()
 		{
@@ -54,8 +56,33 @@ package
 			}
 		}
 		
-		public function Upgrade() {
-			staminaBar.Upgrade(10);
+		public function SetHealthBarPos(yPos:int) {
+			healthBar.y = yPos;
+			staminaBar.y = yPos + staminaBar.height + 10;
+		}
+		
+		public function Update() {
+			for (var i:int = 0; i < boxes.length; i++) {
+				var box:DescriptionBox = boxes[i] as DescriptionBox;
+				box.Update();
+				if (box.dead) {
+					boxes.removeAt(i);
+					GameManager.gameScreen.GetRoom().removeChild(box);
+					break;
+				}
+			}
+		}
+		public function UpgradeStamina(amount:int) {
+			staminaBar.Upgrade(amount);
+		}
+		
+		public function AddDescriptor(box:DescriptionBox) {
+			boxes.push(box);
+			GameManager.gameScreen.GetRoom().addChild(box);
+		}
+		
+		public function UpgradeHealth(amount:int) {
+			healthBar.Upgrade(amount);
 		}
 		
 		private function ClearDescriptor(e:TimerEvent) {

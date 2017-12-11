@@ -20,6 +20,8 @@ package Objects
 		private var showing:Boolean;
 		protected var canUse:Boolean = true;
 		public var readyToUse:Boolean = true;
+		var useTimer:int = 0;
+		public var initialized:Boolean = false;
 		
 		public function UsableObject() 
 		{
@@ -34,6 +36,7 @@ package Objects
 		
 		public function UseInitialize():void {
 			GameManager.main.stage.addEventListener(KeyboardEvent.KEY_DOWN, KeyDown);
+			initialized = true;
 			this.useBounds = getChildByName("useBounds") as MovieClip;
 			addEventListener(Event.ENTER_FRAME, Update);
 			addEventListener(Event.REMOVED_FROM_STAGE, RemoveListeners);
@@ -41,18 +44,23 @@ package Objects
 		
 		public function Update(e:Event):void {
 			if(readyToUse) {
-				if(!GameManager.sean.phone.ringing) {
-					if (GameManager.sean.eBounds.hitTestObject(useBounds) && !showing) {
-						//textShow = new TextDisplay(useText, x + width / 2, y - 50);
-						showing = true;
-						var character:String = Keys.GetDictionary()[Keys.USE];
-						GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
-					} else if (!GameManager.sean.eBounds.hitTestObject(useBounds) && showing) {
-						//textShow.Destroy();
-						showing = false;
-						GameManager.ui.SetDescriptor("", true);
+				if (!GameManager.sean.phone.ringing) {
+					if(initialized) {
+						if (GameManager.sean.eBounds.hitTestObject(useBounds) && usable && useTimer <= 0) {
+							//textShow = new TextDisplay(useText, x + width / 2, y - 50);
+							var character:String = Keys.GetDictionary()[Keys.USE];
+							GameManager.ui.SetDescriptor("'" + character + "' - " + useText, true);
+							showing = true;
+						} else if (!GameManager.sean.eBounds.hitTestObject(useBounds) && showing) {
+							//textShow.Destroy();
+							GameManager.ui.SetDescriptor("", true);
+							showing = false;
+						}
 					}
 				}
+			}
+			if (useTimer > 0) {
+				useTimer--;
 			}
 		}
 		
@@ -65,10 +73,12 @@ package Objects
 		
 		
 		public function KeyDown(e:KeyboardEvent):void {
-			if (e.keyCode == Keys.USE && canUse && !GameManager.sean.phone.ringing) {
-				canUse = false;
-				if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
-					Use();
+			if(initialized) {
+				if (e.keyCode == Keys.USE && canUse && !GameManager.sean.phone.ringing) {
+					canUse = false;
+					if (GameManager.sean.eBounds.hitTestObject(useBounds)) {
+						Use();
+					}
 				}
 			}
 		}
@@ -80,7 +90,7 @@ package Objects
 		}
 		
 		protected function Use():void {
-			
+			useTimer = 20;
 		}
 		
 	}
